@@ -1,0 +1,12 @@
+--- Checking e:\PROYECTOS WEB\control_patrimonial_web\data\inventario_patrimonial.db ---
+Columns in 'bienes': ['id', 'codigo_patrimonial', 'denominacion', 'descripcion', 'marca', 'modelo', 'serie', 'estado', 'verificado', 'fecha_inventario', 'cod_barras', 'cal_2025', 'sede_id', 'unidad_id', 'ambiente_id', 'ubicacion_texto', 'responsable', 'responsable_dni', 'usuario_registro', 'fecha_registro', 'codigo_siga_1', 'codigo_siga_2', 'cal_2024', 'cal_2023', 'cal_2022', 'cal_2021', 'cal_2020']
+Has 'sede' column: NO
+Has 'sede_id' column: YES
+
+
+--- Checking e:\PROYECTOS WEB\inventario2025\data\inventario_patrimonial.db ---
+Columns in 'bienes': ['id', 'codigo_patrimonial', 'denominacion', 'descripcion', 'marca', 'modelo', 'serie', 'estado', 'verificado', 'fecha_inventario', 'cod_barras', 'cal_2025', 'sede_id', 'unidad_id', 'ambiente_id', 'ubicacion_texto', 'responsable', 'responsable_dni', 'usuario_registro', 'fecha_registro', 'codigo_siga_1', 'codigo_siga_2', 'cal_2024', 'cal_2023', 'cal_2022', 'cal_2021', 'cal_2020']
+Has 'sede' column: NO
+Has 'sede_id' column: YES
+
+

@@ -1,0 +1,181 @@
+================================================================================
+GUÍA RÁPIDA - ACTUALIZAR BIENES CON EXCEL
+================================================================================
+
+🎯 OBJETIVO: Que los 12,826 bienes NUNCA desaparezcan
+
+================================================================================
+PASO 1: ANTES DE IMPORTAR (5 minutos)
+================================================================================
+
+En el servidor (10.28.106.250), ejecuta esto:
+
+    cd ~/control_patrimonial
+    python3 scripts/verificar_integridad.py
+
+Debe mostrar:
+    ✓ Total bienes: 12,826
+    ✓ CAL 2025: 2,529
+    ✓ SISTEMA ÍNTEGRO
+
+Si no, DETENTE. No importes nada aún.
+
+================================================================================
+PASO 2: HACER BACKUP (2 minutos)
+================================================================================
+
+En el servidor:
+
+    # Copiar SQL de backup
+    pg_dump -U control_patrimonial control_patrimonial > \
+    backup_$(date +%Y%m%d_%H%M%S).sql
+
+    # Verificar que el backup se creó
+    ls -lh backup_*.sql | tail -1
+
+================================================================================
+PASO 3: ACTUALIZAR DESDE EXCEL (10 minutos)
+================================================================================
+
+Opción A - Si tienes acceso SSH/SCP:
+
+    # Copiar el Excel a servidor
+    scp archivo_actualizado.xlsx patrimonio@10.28.106.250:~/control_patrimonial/
+
+    # En el servidor
+    cd ~/control_patrimonial
+    python3 scripts/import_bienes.py archivo_actualizado.xlsx
+
+Opción B - Si modificaste Excel local:
+
+    # Enviar el archivo al servidor
+    # Luego ejecutar el import en servidor
+
+================================================================================
+PASO 4: VERIFICAR DESPUÉS (5 minutos)
+================================================================================
+
+En el servidor, ejecuta INMEDIATAMENTE:
+
+    python3 scripts/verificar_integridad.py
+
+Debe mostrar:
+    ✓ Total bienes >= 12,700
+    ✓ CAL 2025 >= 2,500
+    ✓ Avance >= 19.5%
+
+    Y ESPECIALMENTE:
+    ✓ SISTEMA ÍNTEGRO
+
+Si muestra ✗ en lugar de ✓, entonces:
+    1. Deja de trabajar
+    2. Contacta al administrador
+    3. Restaura el backup anterior
+
+================================================================================
+PASO 5: REINICIAR GUNICORN (2 minutos)
+================================================================================
+
+En el servidor:
+
+    pkill -9 gunicorn
+    cd ~/control_patrimonial
+    nohup /home/patrimonio/control_patrimonial/venv/bin/gunicorn \
+    --config gunicorn_config.py wsgi:app > gunicorn.log 2>&1 &
+
+    sleep 3
+    ps aux | grep gunicorn | grep -v grep
+
+Debe mostrar 3 líneas de gunicorn.
+
+================================================================================
+PASO 6: VERIFICAR EN NAVEGADOR (3 minutos)
+================================================================================
+
+Abre: http://10.28.106.250
+
+Verifica:
+    ✓ Dashboard muestra ~12,826 bienes
+    ✓ No hay errores rojos
+    ✓ Avance ~19.72% (o mayor si agregaste CAL 2025)
+    ✓ Los datos se ven completos
+
+================================================================================
+¿QUE PASÓ LA ÚLTIMA VEZ?
+================================================================================
+
+ANTES (Incorrecto):
+    Excel → SQLite local → ❌ PostgreSQL No se actualizó
+    Sistema mostraba 12,158 en lugar de 12,826
+
+AHORA (Correcto):
+    Excel → PostgreSQL (servidor) → ✓ Datos en producción
+    Sistema muestra 12,826 + 2,529 CAL 2025
+
+================================================================================
+ALERTAS CRÍTICAS
+================================================================================
+
+❌ SI VES ESTO, HAY PROBLEMA:
+
+    Total bienes < 12,700
+    CAL 2025 < 2,400
+    Avance < 19.5%
+    SISTEMA NO ÍNTEGRO
+
+✓ ENTONCES HAZLO:
+
+    1. NO hagas más cambios
+    2. Restaura el backup:
+
+       psql -U control_patrimonial control_patrimonial < backup_*.sql
+
+    3. Reinicia gunicorn
+    4. Verifica nuevamente
+    5. Contacta al administrador
+
+================================================================================
+SCRIPTS PARA MEMORIZAR
+================================================================================
+
+Verificar estado (SIEMPRE primero):
+    python3 scripts/verificar_integridad.py
+
+Importar Excel:
+    python3 scripts/import_bienes.py archivo.xlsx
+
+Crear backup:
+    pg_dump -U control_patrimonial control_patrimonial > backup_$(date +%Y%m%d).sql
+
+Reiniciar gunicorn:
+    pkill -9 gunicorn && cd ~/control_patrimonial && \
+    nohup /home/patrimonio/control_patrimonial/venv/bin/gunicorn \
+    --config gunicorn_config.py wsgi:app > gunicorn.log 2>&1 &
+
+================================================================================
+NÚMEROS QUE DEBES RECORDAR
+================================================================================
+
+    Total bienes = 12,826 (NUNCA BAJE DE 12,700)
+    CAL 2025 = 2,529 (NUNCA BAJE DE 2,400)
+    Avance = 19.72% (NUNCA BAJE DE 19.5%)
+
+Si bajan → PROBLEMA → Restaura backup
+
+================================================================================
+DOCUMENTACIÓN COMPLETA
+================================================================================
+
+Para detalles completos, lee:
+    ~/control_patrimonial/PROTOCOLO_ACTUALIZACIONES_SEGURAS.md
+
+Preguntas frecuentes:
+    ~/control_patrimonial/SCRIPTS_GUIA.md
+
+================================================================================
+RESUMEN EN 1 LÍNEA
+================================================================================
+
+Verifica ANTES → Backup → Importa → Verifica DESPUÉS → Reinicia → Confirma
+
+¡LISTO! ✓

@@ -1,0 +1,415 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - Control Patrimonial DF Callao{% endblock %}
+
+{% block content %}
+<div class="login-wrapper">
+  <!-- Contenedor Centrado -->
+  <div class="login-container">
+    <div class="login-card">
+      <!-- Header -->
+      <div class="login-header">
+        <div class="logo-container">
+          <img src="{{ url_for('static', filename='img/logo-df-callao.png') }}"
+            alt="Logo DF Callao Sistema de Inventario" class="logo-img" loading="lazy">
+        </div>
+        <h2 class="login-title">Control Patrimonial</h2>
+      </div>
+
+      <!-- Formulario -->
+      <div class="login-body">
+        {% if get_flashed_messages() %}
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+        <div
+          class="alert alert-{{ category }} alert-dismissible fade show d-flex align-items-center py-2 small shadow-sm"
+          role="alert" data-auto-dismiss="true">
+          {% if category == 'danger' %}
+          <i class="bi bi-exclamation-circle-fill me-2 fs-6"></i>
+          {% elif category == 'warning' %}
+          <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
+          {% else %}
+          <i class="bi bi-info-circle-fill me-2 fs-6"></i>
+          {% endif %}
+          <div>{{ message }}</div>
+          <button type="button" class="btn-close small" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post" novalidate class="login-form">
+          <input type="hidden" name="csrf_token" value="{{ generate_csrf() }}" />
+
+          <!-- Usuario -->
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="username" name="username" placeholder="Usuario" required
+              autofocus autocomplete="username">
+            <label for="username">
+              <i class="bi bi-person me-2"></i>Usuario
+            </label>
+          </div>
+
+          <!-- Contraseña -->
+          <div class="form-floating mb-3 position-relative">
+            <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña" required
+              autocomplete="current-password">
+            <label for="password">
+              <i class="bi bi-lock me-2"></i>Contraseña
+            </label>
+            <button
+              class="btn btn-link text-muted position-absolute end-0 top-50 translate-middle-y text-decoration-none pe-3"
+              type="button" id="togglePassword" aria-label="Mostrar/ocultar contraseña">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+
+          <!-- Recordar sesión -->
+          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div class="form-check mb-0">
+              <input class="form-check-input" type="checkbox" id="remember" name="remember" value="on">
+              <label class="form-check-label small text-muted" for="remember">
+                Recordarme 7 días
+              </label>
+            </div>
+            <a href="#" class="small text-decoration-none" style="color: var(--mp-primary); font-weight: 500;"
+              data-bs-toggle="tooltip" title="Contacta al administrador">
+              <i class="bi bi-question-circle me-1"></i>¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          <!-- Botón de envío -->
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg-login">
+              INGRESAR <i class="bi bi-arrow-right ms-2"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Footer -->
+      <div class="login-footer">
+        <p class="text-muted mb-0">
+          <i class="bi bi-shield-check" style="color: var(--success);"></i>
+          <span class="small ms-2">Ministerio Público - Distrito Fiscal del Callao</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts específicos del login -->
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+
+<!-- Estilos específicos del login -->
+<style>
+  /* Login Wrapper - Fullscreen */
+  .login-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--mp-primary) 0%, var(--mp-primary-dark) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  /* Container - Centrado y responsive */
+  .login-container {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  /* Card */
+  .login-card {
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    animation: slideInUp 0.5s ease-out;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Header */
+  .login-header {
+    background: linear-gradient(135deg, var(--mp-primary) 0%, var(--mp-primary-light) 100%);
+    color: white;
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+
+  .logo-container {
+    height: 25vh;
+    max-height: 280px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    background: transparent;
+  }
+
+  .logo-img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
+    transition: all 0.3s ease;
+    background: transparent;
+  }
+
+  .logo-img:hover {
+    transform: scale(1.08);
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+  }
+
+  .login-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+  }
+
+  .login-subtitle {
+    font-size: 0.9rem;
+    opacity: 0.95;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  /* Body */
+  .login-body {
+    padding: 2rem 1.5rem;
+  }
+
+  .login-form {
+    margin-top: 1rem;
+  }
+
+  /* Formulario Floating */
+  .form-floating>.form-control {
+    height: 3rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    font-size: 0.95rem;
+  }
+
+  .form-floating>.form-control:focus {
+    background-color: white;
+    border-color: var(--mp-primary);
+    box-shadow: 0 0 0 0.25rem rgba(30, 58, 95, 0.15);
+  }
+
+  .form-floating>label {
+    color: var(--text-secondary);
+    padding: 1rem 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .form-floating>.form-control:focus~label,
+  .form-floating>.form-control:not(:placeholder-shown)~label {
+    color: var(--mp-primary);
+    background-color: transparent;
+  }
+
+  /* Botón Toggle Contraseña */
+  #togglePassword {
+    color: var(--text-secondary) !important;
+    z-index: 10;
+  }
+
+  #togglePassword:hover {
+    color: var(--mp-primary) !important;
+  }
+
+  /* Checkbox */
+  .form-check-input {
+    border-color: #dee2e6;
+    cursor: pointer;
+  }
+
+  .form-check-input:checked {
+    background-color: var(--mp-primary);
+    border-color: var(--mp-primary);
+  }
+
+  .form-check-input:focus {
+    border-color: var(--mp-primary);
+    box-shadow: 0 0 0 0.25rem rgba(30, 58, 95, 0.15);
+  }
+
+  /* Botón Login */
+  .btn-lg-login {
+    height: 3rem;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-lg-login:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-lg-login:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Footer */
+  .login-footer {
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    text-align: center;
+    border-top: 1px solid #dee2e6;
+  }
+
+  .login-footer .text-muted {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Alertas */
+  .alert {
+    border-radius: 8px;
+    border-left: 4px solid;
+    font-size: 0.9rem;
+  }
+
+  /* Override navbar y footer para login */
+  nav.navbar {
+    display: none !important;
+  }
+
+  footer {
+    display: none !important;
+  }
+
+  .main-content {
+    padding: 0 !important;
+  }
+
+  /* Responsive */
+  @media (max-width: 576px) {
+    .login-header {
+      padding: 1.5rem 1rem;
+    }
+
+    .login-body {
+      padding: 1.5rem 1rem;
+    }
+
+    .logo-container {
+      height: 15vh;
+      max-height: 120px;
+      margin-bottom: 0.5rem;
+    }
+
+    .login-title {
+      font-size: 1.5rem;
+    }
+
+    .login-subtitle {
+      font-size: 0.85rem;
+    }
+
+    .form-floating>label {
+      font-size: 0.85rem;
+      padding: 0.5rem 0.75rem;
+    }
+
+    .login-form {
+      margin-top: 0.5rem;
+    }
+
+    .login-footer {
+      padding: 0.75rem;
+    }
+
+    .login-footer .text-muted {
+      font-size: 0.75rem;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .login-footer .text-muted span {
+      margin-left: 0 !important;
+    }
+  }
+
+  /* Tablet */
+  @media (max-width: 768px) {
+    .login-container {
+      max-width: 100%;
+      padding: 1rem;
+    }
+
+    .login-card {
+      max-width: 450px;
+    }
+  }
+
+  /* Dark theme */
+  [data-theme="dark"] .login-wrapper {
+    background: linear-gradient(135deg, #1a2942 0%, #0f1729 100%);
+  }
+
+  [data-theme="dark"] .login-card {
+    background: #1e293b;
+    color: var(--text-primary);
+  }
+
+  [data-theme="dark"] .login-header {
+    background: linear-gradient(135deg, #1a2942 0%, #2d4a75 100%);
+  }
+
+  [data-theme="dark"] .form-floating>.form-control {
+    background-color: #334155;
+    border-color: #475569;
+    color: var(--text-primary);
+  }
+
+  [data-theme="dark"] .form-floating>.form-control:focus {
+    background-color: #1e293b;
+    border-color: var(--mp-primary);
+    color: var(--text-primary);
+  }
+
+  [data-theme="dark"] .login-footer {
+    background-color: #0f172a;
+    border-top-color: #334155;
+  }
+
+  [data-theme="dark"] .form-floating>label {
+    color: var(--text-secondary);
+  }
+
+  [data-theme="dark"] .alert {
+    color: var(--text-primary);
+  }
+</style>
+{% endblock %}

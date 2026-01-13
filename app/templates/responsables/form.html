@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}{% if responsable %}Editar{% else %}Nuevo{% endif %} Responsable - Control Patrimonial{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        {% if responsable %}
+                            ✏️ Editar Responsable
+                        {% else %}
+                            ➕ Nuevo Responsable
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ generate_csrf() }}"/>
+                        <!-- Nombre (Requerido) -->
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label fw-bold">Nombre *</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre"
+                                value="{{ responsable.nombre if responsable else '' }}" required
+                                placeholder="Ej: JUAN PÉREZ GARCÍA">
+                            <small class="text-muted">Se guardará en MAYÚSCULAS automáticamente</small>
+                        </div>
+
+                        <!-- Sede (Opcional) -->
+                        <div class="mb-3">
+                            <label for="sede_id" class="form-label">Sede (Opcional)</label>
+                            <select class="form-select" id="sede_id" name="sede_id">
+                                <option value="">Seleccione una sede</option>
+                                {% for sede in sedes %}
+                                <option value="{{ sede.id }}" {% if responsable and responsable.sede_id == sede.id %}selected{% endif %}>
+                                    {{ sede.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Dependencia (Opcional) -->
+                        <div class="mb-3">
+                            <label for="dependencia_id" class="form-label">Dependencia (Opcional)</label>
+                            <select class="form-select" id="dependencia_id" name="dependencia_id">
+                                <option value="">Seleccione una dependencia</option>
+                                {% for unidad in unidades %}
+                                <option value="{{ unidad.id }}" {% if responsable and responsable.dependencia_id == unidad.id %}selected{% endif %}>
+                                    {{ unidad.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('responsables.listar_responsables') }}" class="btn btn-secondary">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if responsable %}
+                                    Guardar Cambios
+                                {% else %}
+                                    Crear Responsable
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

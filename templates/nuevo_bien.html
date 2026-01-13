@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Nuevo Bien - Inventario Patrimonial{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Agregar Nuevo Bien</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Información del Bien</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('nuevo_bien') }}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="codigo_patrimonial" class="form-label">Código Patrimonial *</label>
+                                <input type="text" class="form-control" id="codigo_patrimonial" name="codigo_patrimonial" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="codigo_barras" class="form-label">Código de Barras</label>
+                                <input type="text" class="form-control" id="codigo_barras" name="codigo_barras">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="denominacion" class="form-label">Denominación *</label>
+                                <textarea class="form-control" id="denominacion" name="denominacion" rows="2" required></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="marca" class="form-label">Marca</label>
+                                        <input type="text" class="form-control" id="marca" name="marca">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="modelo" class="form-label">Modelo</label>
+                                        <input type="text" class="form-control" id="modelo" name="modelo">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="serie" class="form-label">Serie</label>
+                                <input type="text" class="form-control" id="serie" name="serie">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="usuario_responsable" class="form-label">Usuario Responsable</label>
+                                <input type="text" class="form-control" id="usuario_responsable" name="usuario_responsable">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="sede" class="form-label">Sede</label>
+                                <input type="text" class="form-control" id="sede" name="sede">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="dependencia" class="form-label">Dependencia</label>
+                                <input type="text" class="form-control" id="dependencia" name="dependencia">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="estado" class="form-label">Estado</label>
+                                        <select class="form-select" id="estado" name="estado">
+                                            <option value="">Seleccione un estado</option>
+                                            <option value="b">Bueno</option>
+                                            <option value="r">Regular</option>
+                                            <option value="m">Malo</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="verificado" class="form-label">Verificado</label>
+                                        <select class="form-select" id="verificado" name="verificado">
+                                            <option value="">Seleccione</option>
+                                            <option value="Sí">Sí</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cal_2025" class="form-label">Cal 2025</label>
+                                <select class="form-select" id="cal_2025" name="cal_2025">
+                                    <option value="">Seleccione</option>
+                                    <option value="Sí">Sí</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary me-md-2">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">Guardar Bien</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Ayuda</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">Complete todos los campos obligatorios marcados con <span class="text-danger">*</span>.</p>
+                <p class="card-text">El código patrimonial debe ser único y seguir el formato establecido por el distrito.</p>
+                <p class="card-text">El estado indica la condición física del bien (Bueno, Regular, Malo).</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

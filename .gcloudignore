@@ -1,0 +1,58 @@
+# Archivos y directorios a ignorar en Cloud Run
+
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+tests/
+.pytest_cache/
+.coverage
+
+# Local files
+.env
+.env.*
+*.db
+*.sqlite
+instance/
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (si lo tienes)
+node_modules/
+npm-debug.log
+
+# Documentación
+docs/
+*.md
+README.md
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Misc
+data/
+tmp/
+*.xlsx
+nul

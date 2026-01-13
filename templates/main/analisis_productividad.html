@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Análisis de Productividad - Inventariadores{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1">
+                <i class="bi bi-bar-chart"></i> Análisis de Productividad
+            </h2>
+            <p class="text-muted mb-0">
+                <i class="bi bi-calendar2"></i> Reporte generado: {{ analisis.fecha_reporte }}
+            </p>
+        </div>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2">Bienes Verificados</p>
+                            <h3 class="mb-0">{{ analisis.total_verificados }}</h3>
+                        </div>
+                        <div class="bg-primary-light p-3 rounded">
+                            <i class="bi bi-check-circle text-primary fs-5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2">Total de Bienes</p>
+                            <h3 class="mb-0">{{ analisis.total_bienes }}</h3>
+                        </div>
+                        <div class="bg-info-light p-3 rounded">
+                            <i class="bi bi-boxes text-info fs-5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2">Progreso General</p>
+                            <h3 class="mb-0">{{ analisis.progreso_general }}%</h3>
+                        </div>
+                        <div class="bg-success-light p-3 rounded">
+                            <i class="bi bi-percent text-success fs-5"></i>
+                        </div>
+                    </div>
+                    <div class="progress mt-3" style="height: 6px;">
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: {{ analisis.progreso_general }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Inventariadores -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0">
+                <i class="bi bi-trophy"></i> Top Inventariadores
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if analisis.inventariadores %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 5%">#</th>
+                            <th>Inventariador</th>
+                            <th class="text-center">Verificados</th>
+                            <th class="text-center">Registrados</th>
+                            <th class="text-center">Progreso</th>
+                            <th class="text-center">% del Total</th>
+                            <th>Última Verificación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for inv in analisis.inventariadores %}
+                        <tr>
+                            <td>
+                                {% if loop.index0 == 0 %}
+                                    <span class="badge bg-warning text-dark">🥇</span>
+                                {% elif loop.index0 == 1 %}
+                                    <span class="badge bg-secondary">🥈</span>
+                                {% elif loop.index0 == 2 %}
+                                    <span class="badge bg-warning">🥉</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark">{{ loop.index }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-light rounded-circle me-2 d-flex align-items-center justify-content-center"
+                                         style="width: 40px; height: 40px;">
+                                        <i class="bi bi-person-fill text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="mb-0 fw-500">{{ inv.nombre }}</p>
+                                        <small class="text-muted">{{ inv.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success">{{ inv.bienes_verificados }}</span>
+                            </td>
+                            <td class="text-center">{{ inv.total_registrados }}</td>
+                            <td class="text-center">
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-info" role="progressbar"
+                                         style="width: {{ inv.progreso_personal }}%"
+                                         title="{{ inv.progreso_personal }}%">
+                                        <small class="fw-500">{{ inv.progreso_personal }}%</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-primary">{{ inv.porcentaje_del_total }}%</span>
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ inv.ultima_verificacion }}</small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info m-4 mb-0">
+                <i class="bi bi-info-circle"></i> No hay inventariadores activos en el sistema.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Detalle por Inventariador -->
+    {% if analisis.inventariadores %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0">
+                <i class="bi bi-pie-chart"></i> Distribución de Estados por Inventariador
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for inv in analisis.inventariadores %}
+                <div class="col-md-6 mb-4">
+                    <div class="card border-light">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">
+                                {{ inv.nombre }}
+                                <span class="badge bg-primary float-end">{{ inv.bienes_verificados }} verificados</span>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if inv.distribucion_estado %}
+                            <div class="list-group list-group-flush">
+                                {% for estado, cantidad in inv.distribucion_estado.items() %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                    <span>
+                                        {% if estado == 'Bueno' %}
+                                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        {% elif estado == 'Regular' %}
+                                            <i class="bi bi-exclamation-circle-fill text-warning me-2"></i>
+                                        {% elif estado == 'Malo' %}
+                                            <i class="bi bi-x-circle-fill text-danger me-2"></i>
+                                        {% else %}
+                                            <i class="bi bi-dash-circle-fill text-muted me-2"></i>
+                                        {% endif %}
+                                        {{ estado }}
+                                    </span>
+                                    <span class="badge bg-secondary">{{ cantidad }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted mb-0">Sin verificaciones realizadas</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+.bg-primary-light { background-color: rgba(13, 110, 253, 0.1); }
+.bg-info-light { background-color: rgba(23, 162, 184, 0.1); }
+.bg-success-light { background-color: rgba(25, 135, 84, 0.1); }
+.fw-500 { font-weight: 500; }
+</style>
+
+<script>
+// Auto-refresh cada 5 minutos
+setTimeout(() => {
+    location.reload();
+}, 5 * 60 * 1000);
+</script>
+{% endblock %}

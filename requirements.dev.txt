@@ -1,0 +1,34 @@
+# Dependencias de Desarrollo - Control Patrimonial v1.3
+# Fecha: 27 Noviembre 2025
+# Para usar: pip install -r requirements.dev.txt
+
+# ===== TODAS LAS DEPENDENCIAS DE PRODUCCIÓN =====
+-r requirements.prod.txt
+
+# ===== TESTING =====
+pytest==9.0.1
+pytest-cov==6.0.0
+coverage==7.12.0
+
+# ===== DESARROLLO =====
+python-dotenv==1.2.1
+
+# ===== UTILIDADES DE DESARROLLO =====
+Pygments==2.19.2
+
+# ===== NOTAS PARA DESARROLLADORES =====
+#
+# Instalación completa para desarrollo:
+# pip install -r requirements.dev.txt
+#
+# Ejecutar tests:
+# pytest tests/ -v
+# pytest tests/ --cov=app --cov-report=html
+#
+# Ver reporte de cobertura:
+# open htmlcov/index.html
+#
+# Development server:
+# python run.py
+# o
+# FLASK_ENV=development flask run

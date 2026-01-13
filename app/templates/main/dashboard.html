@@ -1,0 +1,742 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Control Patrimonial (v2.2.1-20251216){% endblock %}
+
+{% block body_class %}dashboard-mode{% endblock %}
+
+{% block content %}
+<!-- Contenedor Principal Flexbox (Sin Grid de Bootstrap para mayor control) -->
+<!-- min-width: 1400px fuerza el scroll GLOBAL del navegador si la ventana es más chica -->
+<!-- Contenedor Principal Flexbox -->
+<div class="d-flex align-items-start dashboard-container" style="gap: 15px; padding-bottom: 20px;">
+
+    <!-- SIDEBAR -->
+    <div class="dashboard-sidebar" style="flex-shrink: 0; max-width: 200px; width: 200px;">
+        <div class="rounded shadow-sm" style="background-color: #e9ecef; position: sticky; top: 10px; padding: 8px;">
+            <!-- Sección de Filtros -->
+            <form method="get" action="{{ url_for('main.dashboard') }}" id="filtrosSidebar">
+                <h6 class="fw-bold text-dark mb-1" style="font-size: 0.75rem;">Búsqueda</h6>
+                <div class="mb-2">
+                    <input type="text" class="form-control form-control-sm" name="q" placeholder="Buscar..."
+                        value="{{ filtros.q }}" style="font-size: 0.85rem;">
+                </div>
+
+                <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">Ubicación</h6>
+                <div class="mb-1">
+                    <label class="form-label small text-muted mb-1" style="font-size: 0.75rem;">Sede</label>
+                    <select class="form-select form-select-sm" name="sede" style="font-size: 0.85rem;">
+                        <option value="">(Todos)</option>
+                        {% for s in sedes %}
+                        <option value="{{ s.id }}" {% if filtros.sede==s.id|string %}selected{% endif %}>{{ s.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small text-muted mb-1" style="font-size: 0.75rem;">Dependencia</label>
+                    <select class="form-select form-select-sm" name="dependencia" style="font-size: 0.85rem;">
+                        <option value="">(Todos)</option>
+                        {% for d in dependencias %}
+                        <option value="{{ d.id }}" {% if filtros.dependencia==d.id|string %}selected{% endif %}>{{
+                            d.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small text-muted mb-1" style="font-size: 0.75rem;">Inventariador</label>
+                    <select class="form-select form-select-sm" name="inventariador" style="font-size: 0.85rem;">
+                        <option value="">(Todos)</option>
+                        {% for inv in inventariadores %}
+                        <option value="{{ inv[0] }}" {% if filtros.inventariador==inv[0] %}selected{% endif %}>{{ inv[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small text-muted mb-1" style="font-size: 0.75rem;">Estado</label>
+                    <select class="form-select form-select-sm" name="estado" style="font-size: 0.85rem;">
+                        <option value="">(Todos)</option>
+                        <option value="Bueno" {% if filtros.estado=='Bueno' %}selected{% endif %}>Bueno</option>
+                        <option value="Regular" {% if filtros.estado=='Regular' %}selected{% endif %}>Regular</option>
+                        <option value="Malo" {% if filtros.estado=='Malo' %}selected{% endif %}>Malo</option>
+                    </select>
+                </div>
+
+                <!-- GRUPO VERIFICACIÓN: Mismo estilo que botones navegación -->
+                <div class="mb-3">
+                    <label class="form-label small text-muted mb-2" style="font-size: 0.75rem; font-weight: 600;">VERIFICACIÓN</label>
+
+                    <div class="d-grid gap-1">
+                        <!-- TODOS -->
+                        <input type="radio" class="verification-radio" name="verificacion" id="verif-todos" value=""
+                               {% if not filtros.verificacion or filtros.verificacion == '' %}checked{% endif %}>
+                        <label class="btn btn-verification btn-todos text-start btn-sm" for="verif-todos" style="font-size: 0.8rem;">
+                            TODOS
+                        </label>
+
+                        <!-- VERIFICADOS -->
+                        <input type="radio" class="verification-radio" name="verificacion" id="verif-verified" value="verified"
+                               {% if filtros.verificacion == 'verified' %}checked{% endif %}>
+                        <label class="btn btn-verification btn-verified text-start btn-sm" for="verif-verified" style="font-size: 0.8rem;">
+                            VERIF.
+                        </label>
+
+                        <!-- NO VERIFICADOS -->
+                        <input type="radio" class="verification-radio" name="verificacion" id="verif-not-verified" value="not_verified"
+                               {% if filtros.verificacion == 'not_verified' %}checked{% endif %}>
+                        <label class="btn btn-verification btn-not-verified text-start btn-sm" for="verif-not-verified" style="font-size: 0.8rem;">
+                            NO V.
+                        </label>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-1 mb-3">
+                    <button type="button" id="btnLimpiarFiltros" class="btn btn-secondary text-white btn-sm"
+                        style="font-size: 0.8rem;">Limpiar</button>
+                </div>
+            </form>
+
+            <!-- Sección de Navegación -->
+            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">Navegación</h6>
+            <div class="d-grid gap-1">
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary text-start btn-sm"
+                    style="font-size: 0.8rem;">
+                    <i class="bi bi-list-ul me-1"></i> Listado
+                </a>
+                <a href="{{ url_for('main.chat') }}" class="btn text-white text-start btn-sm"
+                    style="background-color: #8e44ad; border-color: #8e44ad; font-size: 0.8rem;">
+                    <i class="bi bi-chat-dots me-1"></i> Chat IA
+                </a>
+                <a href="{{ url_for('main.estadisticas') }}" class="btn btn-warning text-white text-start btn-sm"
+                    style="font-size: 0.8rem;">
+                    <i class="bi bi-bar-chart-fill me-1"></i> Análisis
+                </a>
+                <a href="{{ url_for('main.usuarios') }}" class="btn btn-success text-start btn-sm"
+                    style="background-color: #20c997; border-color: #20c997; font-size: 0.8rem;">
+                    <i class="bi bi-people-fill me-1"></i> Cuentas
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL: Flexible (Ocupa el resto) -->
+    <div style="flex-grow: 1; min-width: 0;">
+        <!-- Botonera Superior -->
+        <div class="d-flex flex-wrap gap-2 mb-3 bg-light p-3 rounded shadow-sm" style="justify-content: center; align-items: center;">
+            <a href="{{ url_for('main.nuevo_bien') }}" class="btn btn-success"
+                style="font-size: 0.9rem; padding: 8px 16px; flex: 0 1 auto;">
+                <i class="bi bi-plus-lg me-1"></i>Añadir
+            </a>
+            <button class="btn btn-info" id="btnEditar" disabled
+                data-url-template="{{ url_for('main.editar_bien', id=0) }}"
+                style="font-size: 0.9rem; padding: 8px 16px; color: white; flex: 0 1 auto;"><i
+                    class="bi bi-pencil me-1"></i>Editar</button>
+            <button class="btn btn-warning" id="btnHistorial" disabled
+                style="font-size: 0.9rem; padding: 8px 16px; color: white; flex: 0 1 auto;"><i
+                    class="bi bi-clock-history me-1"></i>Historial</button>
+            <!-- Grupo de Exportación -->
+            <div class="btn-group" role="group" style="display: flex; gap: 0;">
+                <button class="btn btn-primary" id="btnExportarExcel"
+                    style="font-size: 0.9rem; padding: 8px 16px;"><i
+                        class="bi bi-file-earmark-excel me-1"></i>Excel</button>
+                <button class="btn btn-secondary" id="btnExportarCSV"
+                    style="font-size: 0.9rem; padding: 8px 16px; color: white;"><i
+                        class="bi bi-file-earmark-text me-1"></i>CSV</button>
+            </div>
+            <button class="btn btn-dark" id="btnImportar"
+                style="font-size: 0.9rem; padding: 8px 16px; color: white; flex: 0 1 auto;"><i
+                    class="bi bi-upload me-1"></i>Importar</button>
+        </div>
+
+        <!-- RESUMEN ESTADÍSTICAS GENERALES -->
+        <div class="card shadow-sm mb-3" style="border-left: 5px solid #1e3a5f; background-color: #f8f9fa;">
+            <div class="card-body p-3">
+                <h2 class="card-title fw-bold mb-3 text-center" style="color: #1e3a5f; font-size: 1.5rem; letter-spacing: 0.5px;">📊 Resumen de Inventario</h2>
+                <div class="row text-center" style="margin: 0;">
+                    <div style="padding: 0.5rem; flex: 1;">
+                        <div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #1e3a5f; margin-bottom: 0.25rem;">{{ total_bienes }}</div>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Bienes Totales</small>
+                        </div>
+                    </div>
+                    <div style="padding: 0.5rem; flex: 1;">
+                        <div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #28a745; margin-bottom: 0.25rem;">{{ bienes_con_cal_2025 }}</div>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Con CAL 2025</small>
+                            <div style="font-size: 0.75rem; color: #28a745; font-weight: 600;">{{ ((bienes_con_cal_2025 / total_bienes * 100) if total_bienes > 0 else 0)|round(1) }}%</div>
+                        </div>
+                    </div>
+                    <div style="padding: 0.5rem; flex: 1;">
+                        <div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #dc3545; margin-bottom: 0.25rem;">{{ bienes_sin_cal_2025 }}</div>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Sin CAL 2025</small>
+                            <div style="font-size: 0.75rem; color: #dc3545; font-weight: 600;">{{ ((bienes_sin_cal_2025 / total_bienes * 100) if total_bienes > 0 else 0)|round(1) }}%</div>
+                        </div>
+                    </div>
+                    <div style="padding: 0.5rem; flex: 1;">
+                        <div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #0d6efd; margin-bottom: 0.25rem;" id="cobertura_valor">-</div>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Cobertura Fichas</small>
+                            <div style="font-size: 0.75rem; color: #0d6efd; font-weight: 600;" id="cobertura_porcentaje">-</div>
+                        </div>
+                    </div>
+                    <div style="padding: 0.5rem; flex: 1;">
+                        <div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #6f42c1; margin-bottom: 0.25rem;" id="responsables_valor">-</div>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Responsables</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Bienes (Sin 'table-responsive' para evitar scroll interno) -->
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div>
+                    <table class="table table-striped table-hover mb-0 align-middle" id="tablaBienes"
+                        style="font-size: 0.8rem; margin-bottom: 0;">
+                        <thead class="table-light">
+                            <tr style="height: 28px;">
+                                <th class="text-nowrap" style="padding: 3px 5px; font-size: 0.75rem;">Código</th>
+                                <th class="text-nowrap"
+                                    style="padding: 3px 5px; font-size: 0.75rem; text-align: center;">CÓDIGO DE BARRAS
+                                </th>
+                                <th class="text-nowrap" style="padding: 3px 5px; font-size: 0.75rem;">Denominación</th>
+                                <th class="text-nowrap" style="padding: 3px 5px; font-size: 0.75rem;">Marca</th>
+                                <th class="text-nowrap" style="padding: 3px 5px; font-size: 0.75rem;">Serie</th>
+                                <th class="text-nowrap" style="padding: 3px 5px; font-size: 0.75rem;">Responsable</th>
+                                <th class="text-nowrap" style="padding: 3px 5px; font-size: 0.75rem;">Sede</th>
+                                <th class="text-nowrap" style="padding: 3px 5px; font-size: 0.75rem;">Dependencia</th>
+                                <th class="text-nowrap" style="padding: 3px 5px; font-size: 0.75rem;">Estado</th>
+                                <th class="text-nowrap" style="padding: 3px 5px; font-size: 0.75rem;">Ver</th>
+                                <th class="text-nowrap" style="padding: 3px 5px; font-size: 0.75rem;">CAL</th>
+                                <th class="text-nowrap" style="padding: 3px 5px; font-size: 0.75rem;">Fichas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bien in bienes %}
+                            <tr data-id="{{ bien.id }}" style="cursor: pointer; height: 28px;">
+                                <td class="fw-bold text-primary" style="padding: 3px 5px;">{{ bien.codigo_patrimonial }}
+                                </td>
+                                <td style="padding: 3px 5px; font-size: 0.75rem; text-align: center;">{{ bien.cod_barras
+                                    or '' }}</td>
+                                <td style="padding: 3px 5px; font-size: 0.75rem;">{{ bien.denominacion }}</td>
+                                <td style="padding: 3px 5px; font-size: 0.75rem;">{{ bien.marca }}</td>
+                                <td style="padding: 3px 5px; font-size: 0.75rem;">{{ bien.serie or '' }}</td>
+                                <td style="padding: 3px 5px; font-size: 0.75rem;">{{ bien.responsable }}</td>
+                                <td style="padding: 3px 5px; font-size: 0.75rem;">{{ bien.sede }}</td>
+                                <td style="padding: 3px 5px; font-size: 0.75rem;">{{ bien.dependencia }}</td>
+                                <td style="padding: 3px 5px;">
+                                    {% if bien.estado in ['Bueno', 'b', 'B'] %}
+                                    <span class="badge bg-success" style="font-size: 0.65rem;">Bueno</span>
+                                    {% elif bien.estado in ['Regular', 'r', 'R'] %}
+                                    <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">Reg.</span>
+                                    {% elif bien.estado in ['Malo', 'm', 'M'] %}
+                                    <span class="badge bg-danger" style="font-size: 0.65rem;">Malo</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ bien.estado
+                                        }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center" style="padding: 3px 5px;">
+                                    {% if bien.cal_2025 %}
+                                    <i class="bi bi-check-circle-fill text-success" style="font-size: 0.9rem;"></i>
+                                    {% else %}
+                                    <i class="bi bi-circle text-muted" style="font-size: 0.9rem;"></i>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center" style="padding: 3px 5px; font-size: 0.75rem;">
+                                    {% set cal_value = bien.get('cal_2025') if bien is mapping else bien.cal_2025 %}
+                                    {% if cal_value and cal_value != '0' and cal_value != '' %}
+                                    {% set cal_val = cal_value|string %}
+                                    {% if cal_val.startswith("CAL-") %}
+                                    {% set cal_val = cal_val.replace("CAL-", "") %}
+                                    {% elif cal_val.startswith("CAL'") %}
+                                    {% set cal_val = cal_val.replace("CAL'", "") %}
+                                    {% endif %}
+                                    <span class="badge bg-primary" style="font-size: 0.65rem;">{{ cal_val }}</span>
+                                    {% else %}
+                                    <span class="text-muted" style="font-size: 0.75rem;">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center" style="padding: 3px 5px;" data-codigo="{{ bien.codigo_patrimonial }}">
+                                    <span class="ficha-badge" style="font-size: 0.75rem;">-</span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="12" class="text-center py-2 text-muted" style="font-size: 0.8rem;">No se
+                                    encontraron bienes con los filtros seleccionados.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footer / Paginación -->
+            <div class="card-footer bg-light d-flex justify-content-between align-items-center flex-wrap gap-1 p-2">
+                <div class="text-muted small footer-pagination-info" style="font-size: 0.75rem;">
+                    P{{ page }}/{{ total_pages }}
+                </div>
+
+                {% if total_pages > 1 %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                            <a class="page-link" href="#" data-page="{{ page - 1 }}"
+                                style="padding: 3px 6px; font-size: 0.7rem;">&laquo;</a>
+                        </li>
+                        {% for p in range(1, total_pages + 1) %}
+                        {% if p == page or p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %} <li
+                            class="page-item {% if p == page %}active{% endif %}">
+                            <a class="page-link" href="#" data-page="{{ p }}"
+                                style="padding: 3px 6px; font-size: 0.7rem;">{{ p }}</a>
+                            </li>
+                            {% elif p == page - 3 or p == page + 3 %}
+                            <li class="page-item disabled"><span class="page-link"
+                                    style="padding: 3px 6px; font-size: 0.7rem;">…</span></li>
+                            {% endif %}
+                            {% endfor %}
+                            <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+                                <a class="page-link" href="#" data-page="{{ page + 1 }}"
+                                    style="padding: 3px 6px; font-size: 0.7rem;">&raquo;</a>
+                            </li>
+                    </ul>
+                </nav>
+                {% endif %}
+
+                <button class="btn btn-sm btn-outline-secondary" type="button" onclick="window.location.reload()"
+                    style="padding: 4px 8px; font-size: 0.7rem;">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel de Detalles del Bien -->
+        <div class="card shadow-sm mt-2" id="panelDetalles" style="display: none;">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-2">
+                <h6 class="mb-0 fw-bold" style="font-size: 0.85rem;">Detalle del Bien</h6>
+                <button type="button" class="btn-close btn-close-white btn-sm" id="btnCerrarDetalles"
+                    aria-label="Close"></button>
+            </div>
+            <div class="card-body p-2" id="contenidoDetalles" style="font-size: 0.8rem;">
+                <!-- Información Básica -->
+                <div class="mb-2">
+                    <h6 class="fw-bold mb-1" style="color: #1a3a52; font-size: 0.8rem;">Información Básica</h6>
+                    <div class="row g-1">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">Código</label>
+                            <div id="detalle-codigo" style="font-size: 0.75rem;">-</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">Barras</label>
+                            <div id="detalle-barras" style="font-size: 0.75rem;">-</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">Denominación</label>
+                            <div id="detalle-denominacion" style="font-size: 0.75rem;">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Especificaciones -->
+                <div class="mb-2">
+                    <h6 class="fw-bold mb-1" style="color: #1a3a52; font-size: 0.8rem;">Especificaciones</h6>
+                    <div class="row g-1">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">Marca</label>
+                            <div id="detalle-marca" style="font-size: 0.75rem;">-</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">Modelo</label>
+                            <div id="detalle-modelo" style="font-size: 0.75rem;">-</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">Serie</label>
+                            <div id="detalle-serie" style="font-size: 0.75rem;">-</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">Estado</label>
+                            <div id="detalle-estado" style="font-size: 0.75rem;">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ubicación -->
+                <div class="mb-2">
+                    <h6 class="fw-bold mb-1" style="color: #1a3a52; font-size: 0.8rem;">Ubicación</h6>
+                    <div class="row g-1">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">Sede</label>
+                            <div id="detalle-sede" style="font-size: 0.75rem;">-</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">Dependencia</label>
+                            <div id="detalle-dependencia" style="font-size: 0.75rem;">-</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">Ubicación</label>
+                            <div id="detalle-ubicacion" style="font-size: 0.75rem;">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Responsabilidad -->
+                <div class="mb-2">
+                    <h6 class="fw-bold mb-1" style="color: #1a3a52; font-size: 0.8rem;">Responsabilidad</h6>
+                    <div class="row g-1">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">Responsable</label>
+                            <div id="detalle-responsable" style="font-size: 0.75rem;">-</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">Descripción</label>
+                            <div id="detalle-descripcion" style="font-size: 0.75rem;">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Etiquetas CAL -->
+                <div class="mb-2">
+                    <h6 class="fw-bold mb-1" style="color: #1a3a52; font-size: 0.8rem;">Etiquetas CAL</h6>
+                    <div class="row g-1">
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">2020</label>
+                            <div id="detalle-cal2020" style="font-size: 0.75rem;">-</div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">2021</label>
+                            <div id="detalle-cal2021" style="font-size: 0.75rem;">-</div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">2022</label>
+                            <div id="detalle-cal2022" style="font-size: 0.75rem;">-</div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">2023</label>
+                            <div id="detalle-cal2023" style="font-size: 0.75rem;">-</div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">2024</label>
+                            <div id="detalle-cal2024" style="font-size: 0.75rem;">-</div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold mb-0" style="font-size: 0.7rem;">2025</label>
+                            <div id="detalle-cal2025" style="font-size: 0.75rem;">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Última Modificación -->
+                <div class="mb-2">
+                    <h6 class="fw-bold mb-1" style="color: #1a3a52; font-size: 0.8rem;">Última Modificación</h6>
+                    <div style="padding: 4px; background-color: #f0f5ff; border-left: 3px solid #0d6efd; border-radius: 3px; font-size: 0.7rem;">
+                        <div><small class="text-muted">Fecha/Hora:</small> <span id="detalle-ultima-mod-fecha" style="font-weight: 500;">-</span></div>
+                        <div><small class="text-muted">Usuario:</small> <span id="detalle-ultima-mod-usuario" style="font-weight: 500;">-</span></div>
+                        <div><small class="text-muted">Acción:</small> <span id="detalle-ultima-mod-accion" style="font-weight: 500;">-</span></div>
+                    </div>
+                </div>
+
+                <!-- Observaciones -->
+                <div class="mb-0">
+                    <h6 class="fw-bold mb-1" style="color: #1a3a52; font-size: 0.8rem;">Observaciones</h6>
+                    <div id="detalle-observaciones"
+                        style="padding: 4px; background-color: var(--bg-secondary); border-radius: 3px; min-height: 20px; font-size: 0.75rem;">
+                        -</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Vacío (Cuando no hay selección) -->
+        <div class="alert alert-secondary mt-2 small" id="panelVacio"
+            style="padding: 8px 12px; margin-bottom: 0; font-size: 0.8rem;">
+            <i class="bi bi-info-circle me-1"></i>
+            <strong>Detalle:</strong> Seleccione un bien de la tabla.
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Importación de Bienes -->
+<div class="modal fade" id="modalImportar" tabindex="-1" aria-labelledby="modalImportarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalImportarLabel">Importar Bienes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">Selecciona un archivo Excel (.xlsx o .xls) con los bienes a importar.</p>
+
+                <div class="mb-3">
+                    <a href="#" id="btnDescargarPlantilla" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-download"></i> Descargar plantilla
+                    </a>
+                </div>
+
+                <div class="mb-3">
+                    <label for="archivoImportar" class="form-label">Archivo Excel:</label>
+                    <input type="file" class="form-control" id="archivoImportar" accept=".xlsx,.xls">
+                </div>
+
+                <div id="progressImportar" style="display:none;">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated"></div>
+                    </div>
+                </div>
+
+                <div id="resultadoImportar" style="display:none;">
+                    <div class="alert" role="alert"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarImportar">Importar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación de Descarga -->
+<div class="modal fade" id="modalConfirmarDescarga" tabindex="-1" aria-labelledby="modalConfirmarDescargaLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalConfirmarDescargaLabel">
+                    <i class="bi bi-download me-2"></i>Confirmar descarga
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Se descargará el archivo:</p>
+                <div class="alert alert-light border border-info mb-3">
+                    <strong id="nombreArchivo" style="word-break: break-all;">archivo.xlsx</strong>
+                </div>
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-info-circle me-1"></i>Contiene los registros con los filtros aplicados
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-info btn-sm" id="btnConfirmarDescarga">
+                    <i class="bi bi-download me-1"></i>Descargar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/pagination.js') }}?v=7"></script>
+
+<script src="{{ url_for('static', filename='js/export-import.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/dashboard-filters.js') }}"></script>
+
+<script>
+// Cargar fichas para cada bien cuando la página está lista
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar estadísticas de cobertura de fichas
+    fetch('/fichas/api/stats/cobertura')
+        .then(response => response.json())
+        .then(data => {
+            const coberturaValor = document.getElementById('cobertura_valor');
+            const coberturaPorcentaje = document.getElementById('cobertura_porcentaje');
+            const responsablesValor = document.getElementById('responsables_valor');
+            if (coberturaValor && coberturaPorcentaje) {
+                const porcentaje = data.porcentaje || 0;
+                const fichasSubidas = data.fichas_subidas || 0;
+                const responsablesActivos = data.responsables_activos || 0;
+                coberturaValor.textContent = fichasSubidas;
+                coberturaPorcentaje.textContent = porcentaje.toFixed(2) + '%';
+                if (responsablesValor) {
+                    responsablesValor.textContent = responsablesActivos;
+                }
+            }
+        })
+        .catch(error => console.error('Error al cargar cobertura:', error));
+
+    // Obtener todos los elementos con atributo data-codigo
+    const cellsWithCodigo = document.querySelectorAll('[data-codigo]');
+
+    cellsWithCodigo.forEach(cell => {
+        const codigo = cell.getAttribute('data-codigo');
+        if (codigo) {
+            // Llamar API para obtener fichas
+            const apiUrl = `/fichas/api/bien/${encodeURIComponent(codigo)}`;
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const badge = cell.querySelector('.ficha-badge');
+                    if (data.fichas && data.fichas.length > 0) {
+                        // Mostrar badge con las fichas
+                        const ficha = data.fichas[0]; // Primera ficha (la más reciente)
+                        const detallesUrl = `/fichas/${ficha.ficha_id}/detalles`;
+                        let html = `<a href="${detallesUrl}" title="${ficha.responsable_name} - ${ficha.numero_siga}" style="text-decoration: none; color: inherit;">`;
+                        html += `<span class="badge bg-success" style="font-size: 0.65rem; cursor: pointer;">`;
+                        html += `<i class="bi bi-file-earmark-pdf"></i> ${ficha.numero_siga}`;
+                        html += `</span>`;
+                        html += `</a>`;
+                        badge.innerHTML = html;
+                    }
+                })
+                .catch(error => console.log('Error al cargar fichas para', codigo, ':', error));
+        }
+    });
+});
+</script>
+
+<!-- Estilos específicos del Dashboard -->
+<style>
+    /* SIDEBAR STYLES */
+    .p-2 {
+        padding: 1rem !important;
+        border-radius: 8px;
+        background-color: var(--bg-secondary) !important;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        margin-right: 0 !important;
+    }
+
+    /* Títulos del sidebar */
+    .p-2 h6 {
+        color: var(--mp-primary);
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Formularios en sidebar */
+    .p-2 .form-control,
+    .p-2 .form-select {
+        border-color: #dee2e6;
+        font-size: 0.85rem;
+    }
+
+    .p-2 .form-control:focus,
+    .p-2 .form-select:focus {
+        border-color: var(--mp-primary);
+        box-shadow: 0 0 0 0.25rem rgba(30, 58, 95, 0.15);
+    }
+
+    /* Botones del sidebar */
+    .p-2 .btn-primary {
+        background-color: var(--mp-primary);
+        border-color: var(--mp-primary);
+        color: white;
+        font-size: 0.8rem;
+        width: 100%;
+    }
+
+    .p-2 .btn-primary:hover {
+        background-color: var(--mp-primary-dark);
+        border-color: var(--mp-primary-dark);
+    }
+
+
+    /* Botonera superior */
+    .d-flex.flex-wrap.gap-2.mb-2 {
+        background-color: var(--bg-secondary) !important;
+        padding: 1rem !important;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .d-flex.flex-wrap.gap-2.mb-2 .btn {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+    }
+
+    /* Tabla mejorada */
+    .card {
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 8px;
+    }
+
+    .table {
+        font-size: 0.85rem;
+    }
+
+    .table thead th {
+        background-color: var(--mp-primary) !important;
+        color: white !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.75rem !important;
+        border-bottom: 2px solid var(--mp-primary-dark);
+    }
+
+    .table tbody tr {
+        height: auto;
+    }
+
+    .table tbody td {
+        padding: 0.75rem !important;
+        vertical-align: middle;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(30, 58, 95, 0.05) !important;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(30, 58, 95, 0.02) !important;
+    }
+
+    /* Badges */
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 4px;
+    }
+
+    /* Paginación */
+    .card-footer {
+        background-color: var(--bg-secondary) !important;
+        padding: 1rem !important;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .pagination {
+        margin-bottom: 0;
+    }
+
+    .pagination .page-link {
+        color: var(--mp-primary);
+        border-color: #dee2e6;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .pagination .page-link:hover {
+        background-color: var(--mp-primary);
+        border-color: var(--mp-primary);
+        color: white;
+    }
+
+    .pagination .page-link.active {
+        background-color: var(--mp-primary);
+        border-color: var(--mp-primary);
+    }
+
+    [data-theme="dark"] .pagination .page-link {
+        background-color: #1e293b !important;
+        border-color: #334155;
+    }
+
+    [data-theme="dark"] .card-footer {
+        background-color: #1e293b !important;
+        border-color: #334155;
+    }
+
+    [data-theme="dark"] .table tbody tr:hover {
+        background-color: rgba(59, 130, 246, 0.1) !important;
+    }
+</style>
+{% endblock %}

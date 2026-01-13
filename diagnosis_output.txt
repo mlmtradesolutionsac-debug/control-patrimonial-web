@@ -1,0 +1,8 @@
+=== DIAGNÓSTICO DE BACKEND ===
+Total de bienes en BD: 12826
+Bienes con cal_2025 (Verificados reales en DB): 2527
+Repo.listar_bienes(verificados='1') devolvió: 50 items
+Repo.contar_bienes(verificados='1') devolvió: 2527 items
+ERROR: El repositorio no está filtrando correctamente.
+Repo con filtros vacíos devolvió 5 items (limit 5).
+=== FIN DIAGNÓSTICO ===

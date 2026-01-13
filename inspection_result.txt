@@ -1,0 +1,9 @@
+=== CONTENIDO LOCAL DE SQLITE ===
+=== CONTENIDO LOCAL DE SQLITE ===
+usuarios: 1
+usuarios_app: 6
+sedes: 18
+unidades: 304
+bienes: 12826
+historial: 21955
+=================================

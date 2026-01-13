@@ -1,0 +1,18 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: control-patrimonial
+spec:
+  template:
+    spec:
+      containers:
+      - image: gcr.io/steam-outlet-480502-d7/control-patrimonial:latest
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://control_patrimonial:Control2025@35.222.111.223:5432/control_patrimonial"
+        - name: FLASK_ENV
+          value: "production"
+        - name: SECRET_KEY
+          value: "your-secret-key-change-in-production"
+        - name: PORT
+          value: "8080"

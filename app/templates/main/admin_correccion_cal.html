@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Corrección Masiva CAL 2025 - Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2">Corrección Masiva CAL 2025</h1>
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Volver al Dashboard</a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5 class="card-title mb-0">Herramienta Administrativa</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Objetivo:</strong> Corregir bienes que tienen CAL 2025 registrado pero están marcados como "Malo"</p>
+
+                <h6 class="mt-4 mb-3">Lógica de la corrección:</h6>
+                <ul>
+                    <li>Selecciona bienes donde <code>CAL 2025 != NULL</code> y <code>CAL 2025 != ''</code></li>
+                    <li>Filtra solo los que tienen estado <code>Malo (m)</code></li>
+                    <li>Actualiza estado a <code>Regular (r)</code> en una sola operación</li>
+                </ul>
+
+                <h6 class="mt-4 mb-3">Condiciones:</h6>
+                <ul>
+                    <li>Un bien con CAL 2025 significa que fue verificado en 2025</li>
+                    <li>Un bien verificado NO debería tener estado "Malo" (irrecuperable)</li>
+                    <li>El estado correcto es "Regular" (mantenible) o "Bueno" (funcionando)</li>
+                </ul>
+
+                <div class="alert alert-danger mt-4" role="alert">
+                    <strong>ADVERTENCIA:</strong> Esta operación no se puede deshacer facilmente. Se recomienda:
+                    <ul class="mb-0 mt-2">
+                        <li>Hacer backup de la BD antes de ejecutar</li>
+                        <li>Verificar los resultados después en el dashboard</li>
+                    </ul>
+                </div>
+
+                <form method="POST" action="{{ url_for('main.corregir_cal_2025_admin') }}" class="mt-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="confirmacion" name="confirmacion" required>
+                        <label class="form-check-label" for="confirmacion">
+                            Confirmo que he realizado backup y entiendo que esta operación puede afectar {{ total_bienes_malo }} bienes
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-danger mt-3">
+                        Ejecutar Corrección Ahora
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Estadísticas Actuales</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Total bienes:</strong> {{ total_bienes }}</p>
+                <p><strong>Bienes con CAL 2025:</strong> {{ total_bienes_con_cal }}</p>
+
+                <hr>
+
+                <p><strong>Estado BUENO:</strong> {{ total_bueno }}</p>
+                <p><strong>Estado REGULAR:</strong> {{ total_regular }}</p>
+                <p class="text-danger"><strong>Estado MALO:</strong> {{ total_malo }}</p>
+
+                <hr>
+
+                <p class="text-warning"><strong>Bienes a corregir:</strong></p>
+                <p class="h5">{{ total_bienes_malo }}</p>
+                <small>(Con CAL 2025 + Estado Malo)</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

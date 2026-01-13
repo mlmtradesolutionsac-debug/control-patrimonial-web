@@ -1,0 +1,25 @@
+steps:
+  # Paso 1: Descargar el archivo SQL
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', 'gs://patrimonio-sync/sync_to_cloud.sql', '.']
+
+  # Paso 2: Conectarse a Cloud SQL y ejecutar el SQL
+  - name: 'gcr.io/cloud-builders/cloud-sql-proxy'
+    args:
+      - 'steam-outlet-480502-d7:us-central1:patrimonio-sql-v1'
+      - '--max-connections=5'
+    waitFor: []
+
+  # Paso 3: Ejecutar psql
+  - name: 'gcr.io/cloud-builders/psql'
+    args:
+      - '-h'
+      - 'localhost'
+      - '-U'
+      - 'control_patrimonial'
+      - '-d'
+      - 'control_patrimonial'
+      - '-f'
+      - 'sync_to_cloud.sql'
+    env:
+      - 'PGPASSWORD=Control2025'

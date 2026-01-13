@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Fichas de Levantamiento - Control Patrimonial{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold">📋 Fichas de Levantamiento</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('fichas.subir_ficha') }}" class="btn btn-success btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Subir Nueva Ficha
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtro por Responsable -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="responsable-input" class="form-label small fw-bold">Buscar Usuario</label>
+            <div style="position: relative;">
+                <input type="text" class="form-control mb-2" id="responsable-input"
+                       placeholder="Escribe para filtrar usuarios..." autocomplete="off">
+                <div id="responsable-dropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #dee2e6; border-top: none; max-height: 200px; overflow-y: auto; display: none; z-index: 1000;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title small text-muted">Total Fichas</h5>
+                    <h3 class="fw-bold" id="stat-total">-</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title small text-muted">Pendientes</h5>
+                    <h3 class="fw-bold text-warning" id="stat-pendientes">-</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Fichas -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            {% if fichas %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Número SIGA</th>
+                            <th>Responsable</th>
+                            <th>Usuario</th>
+                            <th>Bienes</th>
+                            <th>Estado</th>
+                            <th>Fecha Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ficha in fichas %}
+                        <tr>
+                            <td>
+                                <strong>{{ ficha.numero_siga }}</strong>
+                            </td>
+                            <td>
+                                <i class="bi bi-person-check text-primary"></i>
+                                <strong>{{ ficha.responsable_name }}</strong>
+                            </td>
+                            <td>{{ ficha.usuario_levantamiento or '-' }}</td>
+                            <td>
+                                <span class="badge bg-primary">{{ ficha.cantidad_bienes }}</span>
+                            </td>
+                            <td>
+                                {% if ficha.estado == 'PENDIENTE' %}
+                                <span class="badge bg-warning">PENDIENTE</span>
+                                {% elif ficha.estado == 'VERIFICADA' %}
+                                <span class="badge bg-success">VERIFICADA</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ ficha.estado }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ ficha.fecha_creacion.strftime('%d/%m/%Y %H:%M') if ficha.fecha_creacion else '-' }}</td>
+                            <td>
+                                <a href="{{ url_for('fichas.detalles_ficha', ficha_id=ficha.id) }}"
+                                   class="btn btn-sm btn-info" title="Ver detalles">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('fichas.descargar_ficha', ficha_id=ficha.id) }}"
+                                   class="btn btn-sm btn-primary" title="Descargar PDF">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                                {% if current_user.is_admin and ficha.estado == 'PENDIENTE' %}
+                                <form method="POST" action="{{ url_for('fichas.verificar_ficha', ficha_id=ficha.id) }}"
+                                      style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                                    <button type="submit" class="btn btn-sm btn-success" title="Verificar">
+                                        <i class="bi bi-check-circle"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-4 text-center text-muted">
+                <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                <p class="mt-2">No hay fichas de levantamiento</p>
+                <a href="{{ url_for('fichas.subir_ficha') }}" class="btn btn-sm btn-success">
+                    Subir Primera Ficha
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputBusqueda = document.getElementById('responsable-input');
+    const dropdownDiv = document.getElementById('responsable-dropdown');
+    const statTotal = document.getElementById('stat-total');
+    const statPendientes = document.getElementById('stat-pendientes');
+
+    if (!inputBusqueda || !dropdownDiv) {
+        console.error('No se encontraron los elementos del formulario');
+        return;
+    }
+
+    let todosLosUsuarios = [];
+
+    // Cargar todos los usuarios
+    fetch('{{ url_for("fichas.api_usuarios_fichas") }}')
+        .then(response => response.json())
+        .then(data => {
+            todosLosUsuarios = data || [];
+            console.log('Usuarios cargados:', todosLosUsuarios.length);
+        })
+        .catch(error => console.error('Error al cargar usuarios:', error));
+
+    function llenarDropdown(usuarios) {
+        dropdownDiv.innerHTML = '';
+
+        if (usuarios.length === 0) {
+            dropdownDiv.innerHTML = '<div style="padding: 8px 12px; color: #999;">No hay usuarios</div>';
+            dropdownDiv.style.display = 'block';
+            return;
+        }
+
+        usuarios.forEach(usuario => {
+            const item = document.createElement('div');
+            item.style.cssText = 'padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background-color 0.2s;';
+            item.textContent = usuario;
+            item.onmouseover = () => item.style.backgroundColor = '#f8f9fa';
+            item.onmouseout = () => item.style.backgroundColor = 'transparent';
+            item.onclick = () => seleccionarUsuario(usuario);
+            dropdownDiv.appendChild(item);
+        });
+
+        dropdownDiv.style.display = 'block';
+    }
+
+    function seleccionarUsuario(usuario) {
+        window.location.href = '{{ url_for("fichas.filtrar_fichas") }}?responsable=' + encodeURIComponent(usuario);
+    }
+
+    // Filtrar mientras se escribe
+    inputBusqueda.addEventListener('input', function() {
+        const filtro = this.value.toLowerCase().trim();
+
+        if (filtro === '') {
+            dropdownDiv.style.display = 'none';
+            dropdownDiv.innerHTML = '';
+        } else {
+            const filtrados = todosLosUsuarios.filter(usuario =>
+                usuario.toLowerCase().includes(filtro)
+            );
+            llenarDropdown(filtrados);
+        }
+    });
+
+    // Cerrar dropdown cuando pierde foco
+    inputBusqueda.addEventListener('blur', function() {
+        setTimeout(() => {
+            dropdownDiv.style.display = 'none';
+        }, 200);
+    });
+
+    // Mostrar dropdown cuando tiene foco y hay usuarios
+    inputBusqueda.addEventListener('focus', function() {
+        if (this.value.trim() === '' && todosLosUsuarios.length > 0) {
+            llenarDropdown(todosLosUsuarios);
+        }
+    });
+
+    // Cargar estadísticas
+    fetch('{{ url_for("fichas.api_estadisticas_fichas") }}')
+        .then(response => response.json())
+        .then(data => {
+            if (statTotal) statTotal.textContent = data.total_fichas;
+            if (statPendientes) statPendientes.textContent = data.pendientes;
+        })
+        .catch(error => console.error('Error al cargar estadísticas:', error));
+});
+</script>
+{% endblock %}

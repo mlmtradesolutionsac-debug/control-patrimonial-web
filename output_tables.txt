@@ -1,0 +1,53 @@
+--- Table: sedes ---
+(0, 'id', 'INTEGER', 0, None, 1)
+(1, 'nombre', 'TEXT', 1, None, 0)
+(2, 'direccion', 'TEXT', 0, None, 0)
+Content sample:
+(1, 'Distrito Fiscal del Callao', 'Av. Italia S/N - Callao')
+(2, 'Tipo SIGA 5', 'Tipo SIGA 5')
+(3, 'Tipo SIGA 36', 'Tipo SIGA 36')
+
+
+--- Table: unidades ---
+(0, 'id', 'INTEGER', 0, None, 1)
+(1, 'sede_id', 'INTEGER', 1, None, 0)
+(2, 'nombre', 'TEXT', 1, None, 0)
+(3, 'tipo', 'TEXT', 1, None, 0)
+Content sample:
+(1, 1, 'Fiscalía Penal', 'Fiscalía')
+(2, 1, 'Oficina Administrativa', 'Área')
+(3, 2, 'SIGA 5 - 01° FISC. PROV. EN LO PENAL CORP. DE CALLAO 01° D', 'Área')
+(4, 2, 'SIGA 6 - 01° FISC. PROV. EN LO PENAL CORP. DE CALLAO 02° D', 'Área')
+(5, 2, 'SIGA 7 - 01° FISC. PROV. EN LO PENAL CORP. DE CALLAO 03° D', 'Área')
+
+
+--- Table: ambientes ---
+(0, 'id', 'INTEGER', 0, None, 1)
+(1, 'unidad_id', 'INTEGER', 1, None, 0)
+(2, 'nombre', 'TEXT', 1, None, 0)
+Content sample:
+(1, 1, 'Sala de Reuniones')
+(2, 1, 'Archivo General')
+
+
+--- Table: usuarios ---
+(0, 'id', 'INTEGER', 0, None, 1)
+(1, 'usuario', 'TEXT', 1, None, 0)
+(2, 'password', 'TEXT', 1, None, 0)
+(3, 'nombre', 'TEXT', 0, None, 0)
+(4, 'rol', 'TEXT', 1, None, 0)
+(5, 'fecha_creacion', 'TEXT', 0, None, 0)
+Content sample:
+(1, 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'Administrador', 'admin', '2025-11-14T13:34:18')
+
+
+--- Table: usuarios_app ---
+(0, 'username', 'TEXT', 0, None, 1)
+(1, 'nombre', 'TEXT', 0, None, 0)
+(2, 'rol', 'TEXT', 1, None, 0)
+(3, 'password_hash', 'TEXT', 1, None, 0)
+(4, 'activo', 'INTEGER', 1, '1', 0)
+(5, 'require_password_change', 'INTEGER', 1, '0', 0)
+Content sample:
+
+

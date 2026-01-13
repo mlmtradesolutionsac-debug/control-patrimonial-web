@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Responsables de Bienes - Control Patrimonial{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="fw-bold">👥 Responsables de Bienes</h2>
+        </div>
+    </div>
+
+    <!-- Buscador con Autocomplete -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <label class="form-label fw-bold">Buscar Responsable</label>
+                    <input type="text" class="form-control form-control-lg" id="buscar_responsable"
+                           placeholder="Ingrese nombre del responsable...">
+                    <small class="text-muted">Empiece a escribir para ver sugerencias</small>
+
+                    <!-- Lista de sugerencias -->
+                    <div id="sugerencias" class="list-group mt-2" style="display: none; max-height: 300px; overflow-y: auto;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultado: Fichas del Responsable Seleccionado -->
+    <div class="row" id="resultado" style="display: none;">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-earmark-pdf"></i> Fichas de <strong id="nombre_responsable"></strong>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="tabla_fichas">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Número SIGA</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th>Bienes</th>
+                                    <th>Operador</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody_fichas">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensaje si no hay responsables -->
+    <div class="alert alert-info" id="sin_responsables">
+        <i class="bi bi-info-circle"></i> No hay responsables con fichas verificadas aún.
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputBuscar = document.getElementById('buscar_responsable');
+    const sugerenciasDiv = document.getElementById('sugerencias');
+    const resultadoDiv = document.getElementById('resultado');
+    const sinResponsablesDiv = document.getElementById('sin_responsables');
+    let responsablesCache = {};
+
+    // Cargar responsables y mostrar si hay
+    fetch('{{ url_for("fichas.api_responsables") }}')
+        .then(r => r.json())
+        .then(data => {
+            if (data.length === 0) {
+                sinResponsablesDiv.style.display = 'block';
+            }
+        });
+
+    // Autocomplete en el buscador
+    inputBuscar.addEventListener('input', function(e) {
+        const query = e.target.value.trim();
+
+        if (query.length < 1) {
+            sugerenciasDiv.style.display = 'none';
+            resultadoDiv.style.display = 'none';
+            return;
+        }
+
+        fetch(`{{ url_for("fichas.api_responsables") }}?q=${encodeURIComponent(query)}`)
+            .then(r => r.json())
+            .then(responsables => {
+                sugerenciasDiv.innerHTML = '';
+
+                if (responsables.length === 0) {
+                    sugerenciasDiv.innerHTML = '<div class="list-group-item text-muted">No encontrado</div>';
+                } else {
+                    responsables.forEach(resp => {
+                        const item = document.createElement('a');
+                        item.href = '#';
+                        item.className = 'list-group-item list-group-item-action';
+                        item.textContent = resp;
+                        item.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            selectResponsable(resp);
+                        });
+                        sugerenciasDiv.appendChild(item);
+                    });
+                }
+
+                sugerenciasDiv.style.display = 'block';
+            });
+    });
+
+    // Cerrar sugerencias al hacer click afuera
+    document.addEventListener('click', function(e) {
+        if (e.target !== inputBuscar && e.target !== sugerenciasDiv) {
+            sugerenciasDiv.style.display = 'none';
+        }
+    });
+
+    function selectResponsable(nombre) {
+        inputBuscar.value = nombre;
+        sugerenciasDiv.style.display = 'none';
+
+        // Cargar fichas del responsable
+        fetch(`{{ url_for("fichas.responsable_detalle", nombre="__NOMBRE__") }}`.replace('__NOMBRE__', nombre))
+            .then(r => r.text())
+            .then(html => {
+                // Extraer los datos del HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const fichasHtml = doc.querySelector('[data-fichas]')?.innerHTML || '';
+
+                if (fichasHtml) {
+                    document.getElementById('nombre_responsable').textContent = nombre;
+                    document.getElementById('tbody_fichas').innerHTML = fichasHtml;
+                    resultadoDiv.style.display = 'block';
+                }
+            });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Monitoreo de Inventario - Inventariadores{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-4">
+    <!-- Título -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-0">Monitoreo de Inventario por Inventariador</h1>
+            <p class="text-muted small mt-1">Seguimiento del progreso de los inventariadores en la recopilación de datos</p>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Resumen -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Inventariadores</p>
+                            <h3 class="mb-0">{{ stats|length }}</h3>
+                        </div>
+                        <i class="bi bi-people text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Bienes Registrados</p>
+                            <h3 class="mb-0">{{ stats|map(attribute='total_registrados')|sum }}</h3>
+                        </div>
+                        <i class="bi bi-archive text-success" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Bienes Inventariados</p>
+                            <h3 class="mb-0">{{ stats|map(attribute='inventariados')|sum }}</h3>
+                        </div>
+                        <i class="bi bi-check-circle text-info" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Subidos a SIGA</p>
+                            <h3 class="mb-0">{{ stats|map(attribute='subidos_siga')|sum }}</h3>
+                        </div>
+                        <i class="bi bi-cloud-upload text-warning" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Inventariadores -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light border-bottom">
+            <h5 class="mb-0">Detalle por Inventariador</h5>
+        </div>
+        <div class="card-body">
+            {% if stats %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="fw-bold">Inventariador</th>
+                            <th class="text-center fw-bold">Total Registrados</th>
+                            <th class="text-center fw-bold">Inventariados</th>
+                            <th class="text-center fw-bold">% Completado</th>
+                            <th class="text-center fw-bold">Pendientes SIGA</th>
+                            <th class="text-center fw-bold">Subidos SIGA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in stats %}
+                        <tr>
+                            <td class="fw-bold">{{ stat.nombre }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary">{{ stat.total_registrados }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-info">{{ stat.inventariados }}</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <div class="progress" style="width: 80px; height: 20px;">
+                                        <div class="progress-bar" role="progressbar"
+                                             style="width: {{ stat.porcentaje_completado }}%;"
+                                             aria-valuenow="{{ stat.porcentaje_completado }}"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <span class="ms-2 small fw-bold">{{ "%.1f"|format(stat.porcentaje_completado) }}%</span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-warning text-dark">{{ stat.pendientes_siga }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success">{{ stat.subidos_siga }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle"></i> No hay datos disponibles para mostrar.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

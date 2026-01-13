@@ -1,0 +1,617 @@
+﻿<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="ImFhNjNkNWU2YTg2OTZjOWNjMTNlNWVjOWRiNTZiYTQ1NjM2MTI4YmYi.aTnTNQ.s-h795mS-h-KDHfnueVG9PW0t_I">
+  <title>Iniciar Sesión - Control Patrimonial DF Callao</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+        <img src="/static/img/logo-mp.png" alt="Logo" height="30"
+          class="d-inline-block align-text-top">
+        <span class="fw-semibold d-none d-md-block">Control Patrimonial</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <!-- Navegación izquierda (si es autenticado) -->
+        
+
+        <!-- Navegación derecha -->
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item me-2">
+            <button class="theme-toggle" id="themeToggle" title="Cambiar tema">
+              <i class="bi bi-moon-stars" id="themeIcon"></i>
+            </button>
+          </li>
+          
+          <li class="nav-item">
+            <a class="nav-link btn btn-outline-light btn-sm px-3 ms-2" href="/auth/login">
+              Ingresar
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <div class="container-fluid main-content">
+    <!-- Mensajes Flash -->
+    
+    
+    
+
+    <!-- Contenido de la página -->
+    
+<div class="login-wrapper">
+  <!-- Contenedor Centrado -->
+  <div class="login-container">
+    <div class="login-card">
+      <!-- Header -->
+      <div class="login-header">
+        <div class="logo-container">
+          <img src="/static/img/logo-df-callao.png" alt="Logo DF Callao Sistema de Inventario"
+            class="logo-img" loading="lazy">
+        </div>
+        <h2 class="login-title">Control Patrimonial</h2>
+      </div>
+
+      <!-- Formulario -->
+      <div class="login-body">
+        
+
+        <form method="post" novalidate class="login-form">
+          <input type="hidden" name="csrf_token" value="ImFhNjNkNWU2YTg2OTZjOWNjMTNlNWVjOWRiNTZiYTQ1NjM2MTI4YmYi.aTnTNQ.s-h795mS-h-KDHfnueVG9PW0t_I" />
+
+          <!-- Usuario -->
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="username" name="username"
+              placeholder="Usuario" required autofocus autocomplete="username">
+            <label for="username">
+              <i class="bi bi-person me-2"></i>Usuario
+            </label>
+          </div>
+
+          <!-- Contraseña -->
+          <div class="form-floating mb-3 position-relative">
+            <input type="password" class="form-control" id="password" name="password"
+              placeholder="Contraseña" required autocomplete="current-password">
+            <label for="password">
+              <i class="bi bi-lock me-2"></i>Contraseña
+            </label>
+            <button
+              class="btn btn-link text-muted position-absolute end-0 top-50 translate-middle-y text-decoration-none pe-3"
+              type="button" id="togglePassword" aria-label="Mostrar/ocultar contraseña">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+
+          <!-- Recordar sesión -->
+          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div class="form-check mb-0">
+              <input class="form-check-input" type="checkbox" id="remember" name="remember" value="on">
+              <label class="form-check-label small text-muted" for="remember">
+                Recordarme 7 días
+              </label>
+            </div>
+            <a href="#" class="small text-decoration-none" style="color: var(--mp-primary); font-weight: 500;"
+              data-bs-toggle="tooltip" title="Contacta al administrador">
+              <i class="bi bi-question-circle me-1"></i>¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          <!-- Botón de envío -->
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg-login">
+              INGRESAR <i class="bi bi-arrow-right ms-2"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Footer -->
+      <div class="login-footer">
+        <p class="text-muted mb-0">
+          <i class="bi bi-shield-check" style="color: var(--success);"></i>
+          <span class="small ms-2">Ministerio Público - Distrito Fiscal del Callao</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts específicos del login -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Toggle Mostrar/Ocultar Contraseña
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    if (toggleBtn && passwordInput) {
+      toggleBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+
+        const icon = this.querySelector('i');
+        if (isPassword) {
+          icon.classList.remove('bi-eye');
+          icon.classList.add('bi-eye-slash');
+        } else {
+          icon.classList.remove('bi-eye-slash');
+          icon.classList.add('bi-eye');
+        }
+      });
+    }
+
+    // Inicializar tooltips de Bootstrap
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Foco en el campo de usuario al cargar
+    const usernameInput = document.getElementById('username');
+    if (usernameInput && !usernameInput.value) {
+      usernameInput.focus();
+    }
+  });
+</script>
+
+<!-- Estilos específicos del login -->
+<style>
+  /* Login Wrapper - Fullscreen */
+  .login-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--mp-primary) 0%, var(--mp-primary-dark) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  /* Container - Centrado y responsive */
+  .login-container {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  /* Card */
+  .login-card {
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    animation: slideInUp 0.5s ease-out;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Header */
+  .login-header {
+    background: linear-gradient(135deg, var(--mp-primary) 0%, var(--mp-primary-light) 100%);
+    color: white;
+    padding: 2rem 1.5rem;
+    text-align: center;
+  }
+
+  .logo-container {
+    height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    background: transparent;
+  }
+
+  .logo-img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
+    transition: all 0.3s ease;
+    background: transparent;
+  }
+
+  .logo-img:hover {
+    transform: scale(1.08);
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+  }
+
+  .login-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+  }
+
+  .login-subtitle {
+    font-size: 0.9rem;
+    opacity: 0.95;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  /* Body */
+  .login-body {
+    padding: 2rem 1.5rem;
+  }
+
+  .login-form {
+    margin-top: 1rem;
+  }
+
+  /* Formulario Floating */
+  .form-floating > .form-control {
+    height: 3.5rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    font-size: 0.95rem;
+  }
+
+  .form-floating > .form-control:focus {
+    background-color: white;
+    border-color: var(--mp-primary);
+    box-shadow: 0 0 0 0.25rem rgba(30, 58, 95, 0.15);
+  }
+
+  .form-floating > label {
+    color: var(--text-secondary);
+    padding: 1rem 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .form-floating > .form-control:focus ~ label,
+  .form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: var(--mp-primary);
+    background-color: transparent;
+  }
+
+  /* Botón Toggle Contraseña */
+  #togglePassword {
+    color: var(--text-secondary) !important;
+    z-index: 10;
+  }
+
+  #togglePassword:hover {
+    color: var(--mp-primary) !important;
+  }
+
+  /* Checkbox */
+  .form-check-input {
+    border-color: #dee2e6;
+    cursor: pointer;
+  }
+
+  .form-check-input:checked {
+    background-color: var(--mp-primary);
+    border-color: var(--mp-primary);
+  }
+
+  .form-check-input:focus {
+    border-color: var(--mp-primary);
+    box-shadow: 0 0 0 0.25rem rgba(30, 58, 95, 0.15);
+  }
+
+  /* Botón Login */
+  .btn-lg-login {
+    height: 3rem;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-lg-login:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-lg-login:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Footer */
+  .login-footer {
+    background-color: var(--bg-secondary);
+    padding: 1rem;
+    text-align: center;
+    border-top: 1px solid #dee2e6;
+  }
+
+  .login-footer .text-muted {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Alertas */
+  .alert {
+    border-radius: 8px;
+    border-left: 4px solid;
+    font-size: 0.9rem;
+  }
+
+  /* Override navbar y footer para login */
+  nav.navbar {
+    display: none !important;
+  }
+
+  footer {
+    display: none !important;
+  }
+
+  .main-content {
+    padding: 0 !important;
+  }
+
+  /* Responsive */
+  @media (max-width: 576px) {
+    .login-header {
+      padding: 1.5rem 1rem;
+    }
+
+    .login-body {
+      padding: 1.5rem 1rem;
+    }
+
+    .logo-container {
+      height: 140px;
+      margin-bottom: 1rem;
+    }
+
+    .login-title {
+      font-size: 1.5rem;
+    }
+
+    .login-subtitle {
+      font-size: 0.85rem;
+    }
+
+    .form-floating > label {
+      font-size: 0.9rem;
+      padding: 0.75rem;
+    }
+
+    .login-form {
+      margin-top: 0.5rem;
+    }
+
+    .login-footer {
+      padding: 0.75rem;
+    }
+
+    .login-footer .text-muted {
+      font-size: 0.75rem;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .login-footer .text-muted span {
+      margin-left: 0 !important;
+    }
+  }
+
+  /* Tablet */
+  @media (max-width: 768px) {
+    .login-container {
+      max-width: 100%;
+      padding: 1rem;
+    }
+
+    .login-card {
+      max-width: 450px;
+    }
+  }
+
+  /* Dark theme */
+  [data-theme="dark"] .login-wrapper {
+    background: linear-gradient(135deg, #1a2942 0%, #0f1729 100%);
+  }
+
+  [data-theme="dark"] .login-card {
+    background: #1e293b;
+    color: var(--text-primary);
+  }
+
+  [data-theme="dark"] .login-header {
+    background: linear-gradient(135deg, #1a2942 0%, #2d4a75 100%);
+  }
+
+  [data-theme="dark"] .form-floating > .form-control {
+    background-color: #334155;
+    border-color: #475569;
+    color: var(--text-primary);
+  }
+
+  [data-theme="dark"] .form-floating > .form-control:focus {
+    background-color: #1e293b;
+    border-color: var(--mp-primary);
+    color: var(--text-primary);
+  }
+
+  [data-theme="dark"] .login-footer {
+    background-color: #0f172a;
+    border-top-color: #334155;
+  }
+
+  [data-theme="dark"] .form-floating > label {
+    color: var(--text-secondary);
+  }
+
+  [data-theme="dark"] .alert {
+    color: var(--text-primary);
+  }
+</style>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white text-center py-3 mt-auto">
+    <div class="container">
+      <small class="opacity-75">&copy; 2025 Ministerio Público - Distrito Fiscal del Callao</small>
+    </div>
+  </footer>
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // CSRF Token para Fetch API
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    const originalFetch = window.fetch;
+    window.fetch = function (...args) {
+      let [resource, config] = args;
+      if (!config) {
+        config = {};
+      }
+      if (!config.headers) {
+        config.headers = {};
+      }
+      if (config.method && config.method.toUpperCase() !== 'GET') {
+        config.headers['X-CSRFToken'] = csrfToken;
+      }
+      return originalFetch.apply(this, [resource, config]);
+    };
+
+    /* ===== SISTEMA DE TEMAS ===== */
+    class ThemeManager {
+      constructor() {
+        this.html = document.documentElement;
+        this.toggle = document.getElementById('themeToggle');
+        this.icon = document.getElementById('themeIcon');
+        this.storageKey = 'theme-preference';
+
+        if (this.toggle) {
+          this.init();
+        }
+      }
+
+      init() {
+        // Obtener tema inicial
+        const savedTheme = localStorage.getItem(this.storageKey);
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+
+        this.setTheme(initialTheme);
+
+        // Event listener para cambios en preferencia del SO
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+          if (!localStorage.getItem(this.storageKey)) {
+            this.setTheme(e.matches ? 'dark' : 'light');
+          }
+        });
+
+        // Event listener para botón de toggle
+        this.toggle.addEventListener('click', () => this.toggleTheme());
+      }
+
+      setTheme(theme) {
+        const isDark = theme === 'dark';
+
+        if (isDark) {
+          this.html.setAttribute('data-theme', 'dark');
+          if (this.icon) this.icon.className = 'bi bi-sun-fill';
+          if (this.toggle) this.toggle.title = 'Cambiar a tema claro';
+        } else {
+          this.html.removeAttribute('data-theme');
+          if (this.icon) this.icon.className = 'bi bi-moon-stars';
+          if (this.toggle) this.toggle.title = 'Cambiar a tema oscuro';
+        }
+
+        localStorage.setItem(this.storageKey, theme);
+      }
+
+      toggleTheme() {
+        const currentTheme = this.html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        this.setTheme(newTheme);
+      }
+    }
+
+    /* ===== AUTO-HIDE PARA NOTIFICACIONES ===== */
+    class NotificationManager {
+      constructor() {
+        this.dismissTime = 3000; // 3 segundos
+      }
+
+      init() {
+        const alerts = document.querySelectorAll('.alert[data-auto-dismiss="true"]');
+        alerts.forEach(alert => {
+          this.setupAutoDismiss(alert);
+        });
+      }
+
+      setupAutoDismiss(alert) {
+        // Obtener el nivel de severidad para diferentes tiempos
+        let dismissTime = this.dismissTime;
+        if (alert.classList.contains('alert-success') || alert.classList.contains('alert-info')) {
+          dismissTime = 2500; // Mensajes positivos desaparecen más rápido
+        } else if (alert.classList.contains('alert-danger') || alert.classList.contains('alert-warning')) {
+          dismissTime = 4000; // Errores se quedan más tiempo
+        }
+
+        setTimeout(() => {
+          const bsAlert = new bootstrap.Alert(alert);
+          bsAlert.close();
+        }, dismissTime);
+      }
+    }
+
+    // Inicializar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', () => {
+      new ThemeManager();
+      const notificationMgr = new NotificationManager();
+      notificationMgr.init();
+    });
+  </script>
+
+  
+</body>
+
+</html>

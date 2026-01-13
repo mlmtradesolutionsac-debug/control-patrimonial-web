@@ -1,0 +1,40 @@
+# Git
+.git/
+.gitignore
+
+# Entorno virtual y Python
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Configuración y secretos (¡Muy importante!)
+.env
+.env.*
+*.env
+gunicorn.log
+
+# Logs locales
+logs/
+
+# Instancias de BD locales
+instance/
+*.sqlite3
+*.db
+
+# Archivos de IDE
+.vscode/
+.idea/
+
+# Documentación y Temporales
+*.md
+docs/
+tmp/
+coverage/
+htmlcov/
+tests/
+assets/node_modules/
+nul
+*.xlsx

@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Detalles de Ficha - Control Patrimonial{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold">Ficha: {{ ficha.numero_siga }}</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('fichas.listar_fichas') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+            <a href="{{ url_for('fichas.descargar_ficha', ficha_id=ficha.id) }}?download=1" class="btn btn-primary" id="btnDescargar">
+                <i class="bi bi-download"></i> Descargar
+            </a>
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalReemplazar">
+                <i class="bi bi-arrow-repeat"></i> Reemplazar
+            </button>
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalEliminar">
+                <i class="bi bi-trash"></i> Eliminar
+            </button>
+        </div>
+    </div>
+
+    <div class="row" style="height: calc(100vh - 250px);">
+        <!-- Información Principal -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Información</h5>
+                </div>
+                <div class="card-body" style="padding: 1rem 1rem;">
+                    <div class="mb-2">
+                        <label class="text-muted small" style="font-size: 0.75rem;">Número SIGA</label>
+                        <h6 class="fw-bold mb-0" style="font-size: 1rem;">{{ ficha.numero_siga }}</h6>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="text-muted small" style="font-size: 0.75rem;">Responsable</label>
+                        <h6 class="fw-bold mb-0" style="font-size: 0.95rem;">
+                            <i class="bi bi-person-check text-primary"></i> {{ ficha.responsable_name }}
+                        </h6>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="text-muted small" style="font-size: 0.75rem;">Operador</label>
+                        <h6 class="mb-0" style="font-size: 0.9rem;">{{ ficha.usuario_levantamiento }}</h6>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="text-muted small" style="font-size: 0.75rem;">Fecha Creación</label>
+                        <h6 class="mb-0" style="font-size: 0.9rem;">{{ ficha.fecha_creacion.strftime('%d/%m/%Y') if ficha.fecha_creacion else '-' }}</h6>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-muted small" style="font-size: 0.75rem;">Hora</label>
+                        <h6 class="mb-0" style="font-size: 0.9rem;">{{ ficha.fecha_creacion.strftime('%H:%M') if ficha.fecha_creacion else '--:--' }}</h6>
+                    </div>
+
+                    {% if ficha.observaciones %}
+                    <hr style="margin: 0.5rem 0;">
+                    <div class="mt-2">
+                        <label class="text-muted small" style="font-size: 0.75rem;">Observaciones</label>
+                        <div style="font-size: 0.85rem; padding: 0.5rem; background: #f8f9fa; border-left: 3px solid #0d6efd; border-radius: 3px;">
+                            {{ ficha.observaciones }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Vista Previa PDF -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Vista Previa PDF</h5>
+                </div>
+                <div class="card-body p-0" style="flex-grow: 1;">
+                    <div id="pdf-viewer" style="height: 100%; background: #f5f5f5; display: flex; align-items: center; justify-content: center;">
+                        <object
+                            id="pdf-frame"
+                            data="{{ url_for('fichas.descargar_ficha', ficha_id=ficha.id) }}"
+                            type="application/pdf"
+                            style="width: 100%; height: 100%; border: none;">
+                            <p style="text-align: center; padding: 2rem;">
+                                <i class="bi bi-file-pdf" style="font-size: 2rem; color: #dc3545;"></i><br>
+                                PDF no disponible. <a href="{{ url_for('fichas.descargar_ficha', ficha_id=ficha.id) }}?download=1">Descargar PDF</a>
+                            </p>
+                        </object>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Reemplazar PDF -->
+<div class="modal fade" id="modalReemplazar" tabindex="-1" aria-labelledby="modalReemplazarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="modalReemplazarLabel">
+                    <i class="bi bi-arrow-repeat"></i> Reemplazar PDF
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" enctype="multipart/form-data" action="{{ url_for('fichas.reemplazar_pdf', ficha_id=ficha.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                <div class="modal-body">
+                    <p class="text-muted mb-3">
+                        <i class="bi bi-info-circle"></i>
+                        El PDF será reemplazado. El número SIGA se mantendrá: <strong>{{ ficha.numero_siga }}</strong>
+                    </p>
+
+                    <div class="mb-3">
+                        <label for="archivo_nuevo" class="form-label fw-bold">
+                            <i class="bi bi-file-pdf text-danger"></i> Nuevo Archivo PDF *
+                        </label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="archivo_nuevo" name="archivo"
+                                   accept=".pdf" required>
+                            <span class="input-group-text">PDF</span>
+                        </div>
+                        <small class="text-muted d-block mt-1">
+                            Máximo 10MB
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-arrow-repeat"></i> Reemplazar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Eliminar Ficha -->
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalEliminarLabel">
+                    <i class="bi bi-trash"></i> Eliminar Ficha
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <strong>Advertencia:</strong> Esta acción es irreversible
+                </div>
+                <p>
+                    Se eliminará permanentemente la ficha:
+                </p>
+                <div class="p-3 bg-light border rounded">
+                    <p class="mb-2">
+                        <strong>SIGA:</strong> {{ ficha.numero_siga }}
+                    </p>
+                    <p class="mb-2">
+                        <strong>Responsable:</strong> {{ ficha.responsable_name }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Fecha:</strong> {{ ficha.fecha_creacion.strftime('%d/%m/%Y %H:%M') if ficha.fecha_creacion else '-' }}
+                    </p>
+                </div>
+                <p class="mt-3 text-muted small">
+                    Se eliminarán el archivo PDF y todos los datos asociados a esta ficha.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <form method="POST" action="{{ url_for('fichas.eliminar_ficha', ficha_id=ficha.id) }}" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Eliminar Ficha
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para validación de archivo -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación para archivo de reemplazo
+    const archivoNuevo = document.getElementById('archivo_nuevo');
+    if (archivoNuevo) {
+        archivoNuevo.addEventListener('change', function(e) {
+            const archivo = e.target.files[0];
+            if (archivo) {
+                if (!archivo.name.endsWith('.pdf')) {
+                    alert('Solo se permiten archivos PDF');
+                    e.target.value = '';
+                } else if (archivo.size > 10 * 1024 * 1024) { // 10MB
+                    alert('El archivo no puede exceder 10MB');
+                    e.target.value = '';
+                }
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

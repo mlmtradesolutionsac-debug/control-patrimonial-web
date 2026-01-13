@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Subir Ficha de Levantamiento - Control Patrimonial{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-file-earmark-pdf"></i> Subir Ficha de Levantamiento
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                        <!-- Información del Usuario -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Usuario Operador</label>
+                                <input type="text" class="form-control" value="{{ current_user.nombre }}" disabled>
+                                <small class="text-muted">{{ current_user.username }}</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Rol</label>
+                                <input type="text" class="form-control" value="{{ current_user.rol }}" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Nombre del Responsable -->
+                        <div class="mb-3">
+                            <label for="responsable_name" class="form-label fw-bold">
+                                <i class="bi bi-person-check"></i> Nombre del Responsable (Usuario Final) *
+                            </label>
+                            <input type="text" class="form-control" id="responsable_name" name="responsable_name"
+                                   placeholder="Ej: Monica Navarro Pajuelo" required>
+                            <small class="text-muted d-block mt-1">
+                                Nombre completo de la persona que firmó la ficha
+                            </small>
+                        </div>
+
+                        <!-- Selector de Archivo PDF -->
+                        <div class="mb-3">
+                            <label for="archivo" class="form-label fw-bold">
+                                <i class="bi bi-file-pdf text-danger"></i> Archivo PDF *
+                            </label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="archivo" name="archivo"
+                                       accept=".pdf" required>
+                                <span class="input-group-text">PDF</span>
+                            </div>
+                            <small class="text-muted d-block mt-1">
+                                Cargue el PDF de la ficha de levantamiento firmada
+                            </small>
+                        </div>
+
+
+                        <!-- Observaciones -->
+                        <div class="mb-3">
+                            <label for="observaciones" class="form-label fw-bold">Observaciones</label>
+                            <textarea class="form-control" id="observaciones" name="observaciones"
+                                      rows="4" placeholder="Notas adicionales sobre la ficha..."></textarea>
+                        </div>
+
+                        <!-- Información sobre SIGA -->
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Número SIGA:</strong> Se asignará automáticamente al cargar la ficha.
+                            Formato: SIGA-YYYYMMDD-XXXX
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex gap-2 justify-content-between">
+                            <a href="{{ url_for('fichas.listar_fichas') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Volver
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-cloud-upload"></i> Subir Ficha
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Instrucciones -->
+                    <hr class="my-4">
+                    <div class="alert alert-light border">
+                        <h6 class="fw-bold mb-2">📝 Instrucciones:</h6>
+                        <ul class="mb-0">
+                            <li>La ficha debe ser un archivo PDF válido</li>
+                            <li>Indique la cantidad de bienes inventariados</li>
+                            <li>Agregue observaciones si es necesario</li>
+                            <li>Al subir, recibirá un número SIGA único</li>
+                            <li>Los administradores verificarán la ficha posteriormente</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación de archivo PDF
+    document.getElementById('archivo').addEventListener('change', function(e) {
+        const archivo = e.target.files[0];
+        if (archivo) {
+            if (!archivo.name.endsWith('.pdf')) {
+                alert('Solo se permiten archivos PDF');
+                e.target.value = '';
+            } else if (archivo.size > 10 * 1024 * 1024) { // 10MB
+                alert('El archivo no puede exceder 10MB');
+                e.target.value = '';
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

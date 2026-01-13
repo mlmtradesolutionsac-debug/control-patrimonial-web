@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Cambiar Contraseña - Control Patrimonial{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">
+            <i class="bi bi-key"></i> Cambiar Contraseña
+          </h4>
+        </div>
+        <div class="card-body p-4">
+          <p class="text-muted small mb-4">Ingresa tu contraseña actual y la nueva contraseña para cambiarla.</p>
+
+          <form method="POST" action="{{ url_for('auth.cambiar_contrasena') }}" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <div class="mb-3">
+              <label for="contrasena_actual" class="form-label">Contraseña Actual</label>
+              <input type="password" class="form-control" id="contrasena_actual" name="contrasena_actual" required autofocus>
+              <small class="form-text text-muted">Necesitamos tu contraseña actual para verificar tu identidad.</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="contrasena_nueva" class="form-label">Nueva Contraseña</label>
+              <input type="password" class="form-control" id="contrasena_nueva" name="contrasena_nueva" required minlength="6">
+              <small class="form-text text-muted">Mínimo 6 caracteres.</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="contrasena_confirma" class="form-label">Confirmar Nueva Contraseña</label>
+              <input type="password" class="form-control" id="contrasena_confirma" name="contrasena_confirma" required minlength="6">
+              <small class="form-text text-muted">Las contraseñas deben coincidir.</small>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> Cambiar Contraseña
+              </button>
+            </div>
+          </form>
+
+          <hr class="my-4">
+
+          <div class="d-grid gap-2">
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left"></i> Volver al Dashboard
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de seguridad -->
+      <div class="alert alert-info mt-3" role="alert">
+        <i class="bi bi-info-circle"></i>
+        <strong>Consejo de Seguridad:</strong>
+        <ul class="mb-0 mt-2">
+          <li>Usa contraseñas fuertes y únicas</li>
+          <li>No compartas tu contraseña con nadie</li>
+          <li>Cambia tu contraseña regularmente</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
