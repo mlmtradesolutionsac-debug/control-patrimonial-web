@@ -74,7 +74,9 @@
       "Bash(gcloud source repos:*)",
       "Bash(gcloud config:*)",
       "Bash(powershell -Command \"Remove-Item -Path nul -Force -ErrorAction SilentlyContinue; Get-ChildItem nul -ErrorAction SilentlyContinue\")",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git push:*)",
+      "Bash(gh:*)"
     ],
     "deny": [],
     "ask": []
