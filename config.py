@@ -62,9 +62,6 @@ class Config:
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = None  # Sin límite de tiempo para CSRF
     WTF_CSRF_SSL_STRICT = False  # Cloud Run detrás de load balancer
-    WTF_CSRF_CHECK_DEFAULT = True  # Validar CSRF por defecto
-    # Aceptar CSRF token desde headers o formulario
-    WTF_CSRF_HEADERS = ['X-CSRFToken', 'X-CSRF-Token']
 
     # Flask-Login
     REMEMBER_COOKIE_DURATION = timedelta(days=7)
