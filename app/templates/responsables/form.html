@@ -10,15 +10,16 @@
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
                         {% if responsable %}
-                            ✏️ Editar Responsable
+                        ✏️ Editar Responsable
                         {% else %}
-                            ➕ Nuevo Responsable
+                        ➕ Nuevo Responsable
                         {% endif %}
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST">
-                        <input type="hidden" name="csrf_token" value="{{ generate_csrf() }}"/>
+                    <form method="post" novalidate>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
                         <!-- Nombre (Requerido) -->
                         <div class="mb-3">
                             <label for="nombre" class="form-label fw-bold">Nombre *</label>
@@ -34,7 +35,8 @@
                             <select class="form-select" id="sede_id" name="sede_id">
                                 <option value="">Seleccione una sede</option>
                                 {% for sede in sedes %}
-                                <option value="{{ sede.id }}" {% if responsable and responsable.sede_id == sede.id %}selected{% endif %}>
+                                <option value="{{ sede.id }}" {% if responsable and responsable.sede_id==sede.id
+                                    %}selected{% endif %}>
                                     {{ sede.nombre }}
                                 </option>
                                 {% endfor %}
@@ -47,7 +49,8 @@
                             <select class="form-select" id="dependencia_id" name="dependencia_id">
                                 <option value="">Seleccione una dependencia</option>
                                 {% for unidad in unidades %}
-                                <option value="{{ unidad.id }}" {% if responsable and responsable.dependencia_id == unidad.id %}selected{% endif %}>
+                                <option value="{{ unidad.id }}" {% if responsable and
+                                    responsable.dependencia_id==unidad.id %}selected{% endif %}>
                                     {{ unidad.nombre }}
                                 </option>
                                 {% endfor %}
@@ -61,9 +64,9 @@
                             </a>
                             <button type="submit" class="btn btn-primary">
                                 {% if responsable %}
-                                    Guardar Cambios
+                                Guardar Cambios
                                 {% else %}
-                                    Crear Responsable
+                                Crear Responsable
                                 {% endif %}
                             </button>
                         </div>

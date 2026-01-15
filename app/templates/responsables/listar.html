@@ -17,14 +17,15 @@
     </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'warning' }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'warning' }} alert-dismissible fade show"
+        role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
     {% endwith %}
 
     <!-- Tabla de Responsables -->
@@ -42,43 +43,48 @@
                 </thead>
                 <tbody>
                     {% if responsables %}
-                        {% for responsable in responsables %}
-                        <tr>
-                            <td><strong>{{ responsable.nombre }}</strong></td>
-                            <td>
-                                {% if responsable.sede %}
-                                    {{ responsable.sede.nombre }}
-                                {% else %}
-                                    <span class="badge bg-secondary">-</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if responsable.dependencia %}
-                                    {{ responsable.dependencia.nombre }}
-                                {% else %}
-                                    <span class="badge bg-secondary">-</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <small>{{ responsable.fecha_creacion.strftime('%d/%m/%Y %H:%M') if responsable.fecha_creacion else '-' }}</small>
-                            </td>
-                            <td>
-                                <a href="{{ url_for('responsables.editar_responsable', id=responsable.id) }}" class="btn btn-sm btn-info text-white">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form method="POST" action="{{ url_for('responsables.eliminar_responsable', id=responsable.id) }}" style="display: inline;">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Desactivar este responsable?')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
+                    {% for responsable in responsables %}
+                    <tr>
+                        <td><strong>{{ responsable.nombre }}</strong></td>
+                        <td>
+                            {% if responsable.sede %}
+                            {{ responsable.sede.nombre }}
+                            {% else %}
+                            <span class="badge bg-secondary">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if responsable.dependencia %}
+                            {{ responsable.dependencia.nombre }}
+                            {% else %}
+                            <span class="badge bg-secondary">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>{{ responsable.fecha_creacion.strftime('%d/%m/%Y %H:%M') if
+                                responsable.fecha_creacion else '-' }}</small>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('responsables.editar_responsable', id=responsable.id) }}"
+                                class="btn btn-sm btn-info text-white">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST"
+                                action="{{ url_for('responsables.eliminar_responsable', id=responsable.id) }}"
+                                style="display: inline;" class="delete-form">
+                                <input type="hidden" name="csrf_token" value="{{ generate_csrf() }}" />
+                                <button type="button" class="btn btn-sm btn-danger delete-btn">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
                     {% else %}
                     <tr>
                         <td colspan="5" class="text-center text-muted py-4">
-                            <p>No hay responsables creados. <a href="{{ url_for('responsables.crear_responsable') }}">Crear uno nuevo</a></p>
+                            <p>No hay responsables creados. <a
+                                    href="{{ url_for('responsables.crear_responsable') }}">Crear uno nuevo</a></p>
                         </td>
                     </tr>
                     {% endif %}
@@ -88,4 +94,17 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.delete-btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (confirm('¿Desactivar este responsable?')) {
+            this.closest('.delete-form').submit();
+        }
+    });
+});
+</script>
 {% endblock %}

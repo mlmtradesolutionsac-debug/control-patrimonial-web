@@ -101,9 +101,12 @@ def create_app(config_class=Config):
 
     @app.context_processor
     def inject_csrf_token():
-        """Inyectar función generate_csrf en todos los templates"""
+        """Inyectar funciones CSRF en todos los templates"""
         from flask_wtf.csrf import generate_csrf
-        return dict(generate_csrf=generate_csrf)
+        return dict(
+            generate_csrf=generate_csrf,
+            csrf_token=generate_csrf
+        )
 
     @app.after_request
     def set_security_headers(response):
@@ -111,19 +114,21 @@ def create_app(config_class=Config):
         response.headers['X-Frame-Options'] = 'SAMEORIGIN'
         response.headers['X-XSS-Protection'] = '1; mode=block'
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-        csp = (
-            "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' cdn.jsdelivr.net; "
-            "style-src 'self' 'unsafe-inline' cdn.jsdelivr.net; "
-            "font-src 'self' cdn.jsdelivr.net data:; "
-            "img-src 'self' data: blob:; "
-            "connect-src 'self' cdn.jsdelivr.net;"
-        )
+        # CSP permisivo para soportar librerías como Select2 que usan eval
+        csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net code.jquery.com fonts.googleapis.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net fonts.googleapis.com; font-src 'self' cdn.jsdelivr.net data: fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' cdn.jsdelivr.net;"
         response.headers['Content-Security-Policy'] = csp
         return response
 
     # Eliminado check_db_connection para evitar desconexiones agresivas por timeouts transitorios
     # Se confía en pool_pre_ping de SQLAlchemy configurado en config.py
+
+    from flask_wtf.csrf import CSRFError
+
+    @app.errorhandler(CSRFError)
+    def handle_csrf_error(error):
+        from flask import flash, redirect, url_for
+        flash('La sesión ha expirado. Por favor, inicie sesión nuevamente.', 'warning')
+        return redirect(url_for('auth.login'))
 
     @app.errorhandler(404)
     def not_found(error):
