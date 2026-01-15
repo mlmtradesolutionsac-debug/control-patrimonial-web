@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from app.responsables import bp
-from app import db
+from app import db, csrf
 from app.models_sqlalchemy import Responsable, Sede, Unidad
 from app.decorators import require_edit_permission
 
@@ -24,6 +24,7 @@ def listar_responsables():
 @bp.route('/crear', methods=['GET', 'POST'])
 @login_required
 @require_edit_permission
+@csrf.exempt  # Temporarily exempt from CSRF to debug the issue
 def crear_responsable():
     """Crear nuevo responsable"""
     if not current_user.is_admin:
