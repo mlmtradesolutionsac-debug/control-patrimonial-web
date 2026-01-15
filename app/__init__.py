@@ -61,8 +61,9 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     # ProxyFix para Google Cloud Run (detrás de Load Balancer)
-    # Esto le dice a Flask que confíe en los headers X-Forwarded-For, X-Forwarded-Proto, etc.
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
+    # Nota: NO usar x_port=1 porque Cloud Run maneja los puertos internamente
+    # y puede causar que CSRF falle debido a URL scheme mismatch
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=0)
 
     login_manager.init_app(app)
     csrf.init_app(app)
