@@ -18,7 +18,7 @@
                 </div>
                 <div class="card-body">
                     <form method="post" novalidate>
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <input type="hidden" name="csrf_token" value="{{ generate_csrf() }}" />
 
                         <!-- Nombre (Requerido) -->
                         <div class="mb-3">

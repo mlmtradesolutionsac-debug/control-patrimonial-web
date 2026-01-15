@@ -100,13 +100,10 @@ def create_app(config_class=Config):
         )
 
     @app.context_processor
-    def inject_csrf_token():
-        """Inyectar funciones CSRF en todos los templates"""
+    def inject_csrf_helpers():
+        """Inyectar helpers CSRF en todos los templates"""
         from flask_wtf.csrf import generate_csrf
-        return dict(
-            generate_csrf=generate_csrf,
-            csrf_token=generate_csrf
-        )
+        return dict(generate_csrf=generate_csrf)
 
     @app.after_request
     def set_security_headers(response):
