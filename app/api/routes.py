@@ -1212,6 +1212,55 @@ def actualizar_estado_cal_2025():
         return api_error(f'Error en la actualización: {str(e)}', 500)
 
 
+# ==================== ENDPOINT TEMPORAL PARA ACTUALIZACIÓN URGENTE ====================
+@bp.route('/bienes/actualizar-cal-2025-temp', methods=['POST'])
+def actualizar_cal_2025_temp():
+    """
+    ENDPOINT TEMPORAL - Sin autenticación para emergencias
+    Actualiza masivamente bienes con CAL 2025 de MALO → REGULAR
+
+    IMPORTANTE: Este endpoint debe ser ELIMINADO después de usarse una sola vez
+
+    Body (JSON):
+    {
+        "token": "temporal_2025_cal"
+    }
+    """
+    try:
+        from sqlalchemy import and_
+        import json
+
+        data = request.get_json() or {}
+        token = data.get('token', '')
+
+        # Validación de token simple (temporal)
+        if token != 'temporal_2025_cal':
+            return api_error('Token inválido', 401)
+
+        # ACTUALIZACIÓN
+        count = db.session.query(Bien).filter(
+            and_(
+                Bien.estado == 'm',
+                Bien.cal_2025.isnot(None),
+                Bien.cal_2025 != '',
+                Bien.cal_2025 != ' ',
+                Bien.cal_2025 != '0'
+            )
+        ).update({'estado': 'r'}, synchronize_session=False)
+
+        db.session.commit()
+
+        return api_success(
+            {'bienes_actualizados': count},
+            f'Actualizacion exitosa: {count} bienes',
+            200
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        return api_error(f'Error: {str(e)}', 500)
+
+
 # ==================== SALUD DEL API ====================
 @bp.route('/health', methods=['GET'])
 def health():
