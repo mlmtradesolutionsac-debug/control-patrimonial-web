@@ -1064,6 +1064,154 @@ def buscar_duplicados():
         return api_error(f'Error buscando duplicados: {str(e)}', 500)
 
 
+# ==================== ACTUALIZACIÓN MASIVA ====================
+@bp.route('/bienes/actualizar-estado-cal-2025', methods=['POST'])
+@login_required
+@require_edit_permission
+def actualizar_estado_cal_2025():
+    """
+    Endpoint para actualizar masivamente el estado de bienes con CAL 2025
+    de "Malo" → "Regular"
+
+    Requiere:
+    - Login
+    - Permiso de edición
+
+    Body (JSON):
+    {
+        "confirm": true  // Requerido para ejecutar
+    }
+
+    Retorna:
+    {
+        "success": true,
+        "message": "...",
+        "data": {
+            "bienes_antes_verificacion": int,
+            "bienes_actualizados": int,
+            "bienes_en_regular_ahora": int,
+            "detalles": [...]
+        }
+    }
+    """
+    try:
+        from sqlalchemy import and_, text
+        import json
+
+        data = request.get_json() or {}
+        confirm = data.get('confirm', False)
+
+        # Validar confirmación
+        if not confirm:
+            return api_error(
+                'Debes enviar {"confirm": true} en el body para ejecutar la actualización',
+                400
+            )
+
+        # PASO 1: Contar bienes ANTES de actualizar
+        bienes_antes = db.session.query(Bien).filter(
+            and_(
+                Bien.estado == 'm',
+                Bien.cal_2025.isnot(None),
+                Bien.cal_2025 != '',
+                Bien.cal_2025 != ' ',
+                Bien.cal_2025 != '0'
+            )
+        ).all()
+
+        count_antes = len(bienes_antes)
+
+        if count_antes == 0:
+            return api_success(
+                {
+                    'bienes_actualizados': 0,
+                    'mensaje': 'No hay bienes en estado MALO con CAL 2025 para actualizar'
+                },
+                'No hay cambios que hacer',
+                200
+            )
+
+        # PASO 2: Recopilar información de bienes para auditoría
+        bienes_detalles = []
+        for bien in bienes_antes:
+            bienes_detalles.append({
+                'id': bien.id,
+                'codigo_patrimonial': bien.codigo_patrimonial,
+                'denominacion': bien.denominacion,
+                'estado_anterior': bien.estado,
+                'cal_2025': bien.cal_2025
+            })
+
+        # PASO 3: Registrar cambios en historial ANTES de actualizar
+        from datetime import datetime
+        from app.models_sqlalchemy import Historial
+
+        for bien in bienes_antes:
+            historial = Historial(
+                bien_id=bien.id,
+                usuario=f'admin_{current_user.username}',  # Identificar quién hizo el cambio
+                accion='EDITAR',
+                detalle_json=json.dumps({
+                    'campo': 'estado',
+                    'valor_antes': 'm',
+                    'valor_despues': 'r',
+                    'motivo': 'Cambio masivo: Estado Malo → Regular para bienes CON CAL 2025',
+                    'fecha_cambio': datetime.now().isoformat(),
+                    'solicitado_por': current_user.username
+                }),
+                fecha=datetime.now()
+            )
+            db.session.add(historial)
+
+        # PASO 4: Actualizar estado en bienes
+        db.session.query(Bien).filter(
+            and_(
+                Bien.estado == 'm',
+                Bien.cal_2025.isnot(None),
+                Bien.cal_2025 != '',
+                Bien.cal_2025 != ' ',
+                Bien.cal_2025 != '0'
+            )
+        ).update({Bien.estado: 'r'})
+
+        # PASO 5: Confirmar cambios en BD
+        db.session.commit()
+
+        # PASO 6: Verificar que los cambios se realizaron
+        bienes_nuevos_estado = db.session.query(Bien).filter(
+            and_(
+                Bien.estado == 'r',
+                Bien.cal_2025.isnot(None),
+                Bien.cal_2025 != '',
+                Bien.cal_2025 != ' ',
+                Bien.cal_2025 != '0'
+            )
+        ).count()
+
+        # Registrar en logs
+        log_action(
+            current_user.username,
+            'ACTUALIZAR_MASIVO_ESTADO',
+            f'Se actualizaron {count_antes} bienes de MALO → REGULAR (CAL 2025)'
+        )
+
+        return api_success(
+            {
+                'bienes_antes_verificacion': count_antes,
+                'bienes_actualizados': count_antes,
+                'bienes_en_regular_ahora': bienes_nuevos_estado,
+                'detalles': bienes_detalles[:10]  # Mostrar primeros 10 como muestra
+            },
+            f'✅ Se actualizaron exitosamente {count_antes} bienes de MALO → REGULAR',
+            200
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error actualizando estado masivo: {str(e)}", exc_info=True)
+        return api_error(f'Error en la actualización: {str(e)}', 500)
+
+
 # ==================== SALUD DEL API ====================
 @bp.route('/health', methods=['GET'])
 def health():
