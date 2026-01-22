@@ -5,7 +5,10 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from werkzeug.proxy_fix import ProxyFix
+try:
+    from werkzeug.proxy_fix import ProxyFix
+except ImportError:
+    from werkzeug.middleware.proxy_fix import ProxyFix
 import mimetypes
 import os
 from dotenv import load_dotenv
